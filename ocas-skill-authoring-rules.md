@@ -1,0 +1,349 @@
+# OCAS Skill Authoring Rules
+
+Version: 2.3.0
+Author: Indigo Karasu
+
+Changes from 2.2.0: added Background Tasks section covering cron vs. heartbeat decision rules, idempotent registration pattern, SKILL.md declaration requirement, and which skills need background tasks; added Background tasks to Required SKILL.md Sections for System Skills; added background task check to Structural Check; added background tasks to Preferred Design Sequence.
+
+---
+
+## Purpose
+
+These rules define how OCAS Agent Skills should be designed, packaged, and validated. The standard is disciplined minimalism: build the smallest skill that reliably improves agent behavior.
+
+---
+
+## Core Rules
+
+### 1. A skill must earn its existence
+
+Create a skill only when at least one of these is true:
+- The task depends on a repeated tool or command surface
+- The task has repeated structure worth encoding
+- The task needs domain-specific workflow the base model will not reliably infer
+- The task benefits from reusable templates, schemas, or validators
+- The task is frequent or valuable enough to justify maintenance
+
+Do not create a skill when:
+- The behavior is already ordinary model behavior with no special workflow
+- The scope cannot be reduced to one sharp promise
+- The task is too rare to maintain
+- The package would mostly contain generic explanation
+
+### 2. Every skill needs one sharp promise
+
+Complete this sentence: "This skill exists to ______."
+
+If the answer sounds like a platform, department, or product suite, the scope is too broad.
+
+### 3. Routing comes first
+
+The description is routing logic, not branding copy.
+
+A good description:
+- Says what the skill does
+- Says when to use it
+- Uses realistic request language where helpful
+- Distinguishes trigger from nearby non-trigger cases
+
+### 4. SKILL.md is the operational surface
+
+SKILL.md contains:
+- When to use the skill
+- What the skill is responsible for
+- How to execute the task
+- When to consult any support file
+
+SKILL.md does not become:
+- A tutorial for beginners
+- A README substitute
+- A changelog or design diary
+- A knowledge dump
+
+### 5. Match specificity to failure risk
+
+Use general guidance when multiple approaches are acceptable. Use exact instructions, schemas, or scripts where drift is costly.
+
+High-risk areas: command syntax, file paths, metadata fields, package structure, validation logic.
+
+### 6. Add complexity only when justified
+
+Minimum package:
+```
+ocas-{skill}/
+  skill.json
+  SKILL.md
+```
+
+Add `references/`, `scripts/`, or `assets/` only when they materially improve correctness, maintainability, or output quality.
+
+---
+
+## Skill Types
+
+### Shortcut
+Narrow tool wrapper or repeated small action.
+
+Typical SKILL.md size: 20–120 lines.
+
+Sections: title, when to use, quick actions or commands, inputs/options, caveats.
+
+### Workflow
+Multi-step process with moderate branching.
+
+Typical SKILL.md size: 80–250 lines.
+
+Sections: title, when to use, inputs/assumptions, ordered workflow, output requirements, boundaries and pitfalls.
+
+### System
+Meta-skill or durable behavior system with broader internal logic.
+
+Typical SKILL.md size: 150–300 lines. Move secondary detail into references/.
+
+Sections: title, trigger conditions, purpose and boundaries, decision model, execution loop, support file map, validation rules.
+
+---
+
+## Storage Requirements
+
+Every skill with persistent state stores data centrally. No data inside the skill package directory.
+
+```
+~/openclaw/data/{skill-name}/   — state, config, JSONL logs
+~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
+```
+
+LadybugDB skills only:
+```
+~/openclaw/db/{skill-name}/     — LadybugDB database files
+```
+
+Config file location: `~/openclaw/data/{skill-name}/config.json`
+Config must include ConfigBase fields from `spec-ocas-shared-schemas.md`.
+
+See `spec-ocas-storage-conventions.md` for the full standard.
+
+---
+
+## Journal Requirements
+
+Every skill run writes a journal. Runs missing journals are invalid.
+
+Journal file location: `~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
+
+Select journal type based on whether the run executes external side effects:
+- **Observation Journal** — no external side effects (reading, analyzing, discovering)
+- **Action Journal** — external side effects occurred (sending, writing, booking, syncing)
+- **Research Journal** — structured multi-source research session
+
+Some skills emit multiple types depending on the command (e.g., Rally emits Observation during research and Action during trade execution).
+
+See `spec-ocas-journal.md` for the full specification.
+
+---
+
+## Inter-Skill Communication Requirements
+
+Skills communicate through defined intake directories, not direct calls.
+
+If a skill sends signals to another skill or receives signals from another skill, it must reference `spec-ocas-interfaces.md` for the path and format.
+
+Do not create undocumented inter-skill interfaces.
+
+---
+
+## Background Tasks
+
+Some skills require work to happen on a schedule, independent of user invocation. These are background tasks. Most skills do not need them.
+
+### Decision rule: cron vs. heartbeat
+
+Use **cron** when:
+- Exact timing matters (briefing at 7am, market open)
+- The task is heavyweight (journal ingestion, deep consolidation)
+- The task should run in isolation with no main session history
+- Output should be delivered to a channel
+
+Use **heartbeat** (entry in `HEARTBEAT.md`) when:
+- The task is a lightweight poll or check (scan an intake directory, update an aggregate)
+- Timing can drift slightly without consequence
+- The task can batch with other monitoring checks
+
+### Which skills need background tasks
+
+Skills with cron jobs: ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread.
+
+Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (intake poll), ocas-forge (intake poll).
+
+Purely reactive skills need neither: ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-dispatch, ocas-fellow.
+
+### Idempotent registration
+
+Background tasks are registered during `{skill}.init` (which runs automatically on first use). Before calling `cron.add`, always check existing jobs first to avoid duplicates:
+
+```bash
+openclaw cron list   # check before registering
+```
+
+In agent tool calls: list existing jobs, check for the target name, add only if absent.
+
+Job names follow the pattern `{skill-short}:{task-short}` for stable identification. Example: `elephas:ingest`, `vesper:morning`.
+
+### SKILL.md declaration
+
+Every skill that has background tasks must include a `## Background tasks` section in SKILL.md declaring:
+- Job name
+- Mechanism (cron or heartbeat)
+- Schedule
+- What command or action it triggers
+
+Skills with no background tasks omit this section entirely.
+
+### Cron job conventions
+
+All isolated cron jobs use:
+- `sessionTarget: isolated`
+- `lightContext: true` to minimize token cost
+- `wakeMode: next-heartbeat` unless immediate execution is required
+
+Timezone defaults to `America/Los_Angeles`. Update via `cron.update` once the user's timezone is known.
+
+### HEARTBEAT.md
+
+The workspace `HEARTBEAT.md` at `~/.openclaw/workspace/HEARTBEAT.md` is the coordination point for all lightweight heartbeat tasks. Skills that contribute heartbeat entries append to this file during `{skill}.init`, checking for their entry before appending to avoid duplicates.
+
+If `HEARTBEAT.md` is empty (only blank lines and headers), OpenClaw skips heartbeat runs entirely. Keep it non-empty if any skill needs heartbeat execution.
+
+---
+
+## Package Structure Rules
+
+### Base package
+```
+ocas-{skill}/
+  skill.json
+  SKILL.md
+```
+
+### references/
+Use only when material is useful but too secondary or detailed for SKILL.md: longer examples, schemas, tables, templates, review checklists.
+
+Rule: if a reference file exists, SKILL.md must state when and why to read it.
+
+### scripts/
+Use only when deterministic help materially improves reliability: validation, scaffolding, transformation, linting.
+
+Rule: do not add scripts for ornament or theoretical completeness.
+
+### assets/
+Use only when the skill ships reusable operational artifacts: starter files, canonical examples, templates.
+
+---
+
+## Required SKILL.md Sections for System Skills
+
+System skills must include:
+
+**Responsibility Boundary** — what the skill does, what it does not do, which other skill owns the adjacent responsibility.
+
+**Optional Skill Cooperation** — other skills this skill may cooperate with when present, but never depend on.
+
+**Journal Outputs** — which journal type(s) this skill emits.
+
+**Storage Layout** — the skill's data and journal paths under `~/openclaw/`.
+
+**Background Tasks** — cron jobs and heartbeat entries required by this skill, with job names, schedules, and registration commands. Omit if the skill has no background tasks.
+
+---
+
+## Responsibility Boundaries
+
+Before creating a new skill, verify it does not conflict with:
+
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-triage
+
+Each skill build spec includes a Responsibility Boundary section.
+
+---
+
+## Authoring Style
+
+- Prefer concise, operational language
+- Prefer examples over exposition
+- Avoid repeating the same rule across files
+- Define non-public terminology locally if it appears
+- Write build specs as if they will be the only file a coder LLM sees
+- Avoid negative instructions that merely mention absent resources
+
+---
+
+## Atomic Skill Principle
+
+Skills perform one clear role. They may cooperate with other skills when present but must never depend on them.
+
+If a cooperating skill is absent, the skill must still function normally.
+
+---
+
+## Anti-Patterns
+
+- Vague names: `helper`, `utils`, `tools`
+- Descriptions that state only a broad category with no trigger condition
+- SKILL.md that contains every rule, example, and edge case
+- Support directories created "just in case"
+- Build specs referencing prior drafts, hidden memory, or internal process documents
+- Template residue: placeholders never concretized
+- Storage inside the skill package directory
+- Undocumented inter-skill interfaces
+
+---
+
+## Validation Standard
+
+A skill is not ready until it passes all three checks.
+
+### Routing Check
+Test realistic requests that should trigger the skill and realistic requests that should not. The description must plausibly separate those cases.
+
+### Structural Check
+Verify:
+- Required files exist
+- Filenames are consistent
+- Support files exist only when justified
+- SKILL.md points to any support file it depends on
+- Major duplication has been removed
+- Storage paths use `~/openclaw/` root
+- Journal path is specified
+- Background tasks section present if skill has cron or heartbeat requirements; absent if purely reactive
+
+### Usefulness Check
+Verify:
+- The skill has one sharp promise
+- First useful action is obvious
+- Precision is concentrated where failure is costly
+- The package is concise enough to maintain
+
+---
+
+## Preferred Design Sequence
+
+1. Define the candidate capability
+2. Decide whether it deserves to be a skill
+3. Classify the skill type
+4. Define the sharp promise and responsibility boundary
+5. Identify inter-skill interfaces needed (check `spec-ocas-interfaces.md`)
+6. Determine if the skill needs background tasks — if so, choose cron vs. heartbeat and define job names and schedules
+7. Choose the smallest viable package
+7. Decide what belongs in SKILL.md versus support files
+8. Define routing tests and structural checks
+9. Write the self-contained build spec for the coder LLM
+
+---
+
+## Metadata Requirements
+
+Every skill includes consistent author metadata:
+- Author: Indigo Karasu
+- Email: mx.indigo.karasu@gmail.com
+
+Descriptions are optimized for discovery, not brand voice.
