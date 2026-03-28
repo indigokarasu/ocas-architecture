@@ -1,7 +1,9 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.1
+Spec Version: 1.2
 Author: Indigo Karasu
+
+Changes from 1.1: added Praxis→Dispatch Action Handoff entry documenting the session-scoped informal interface between Praxis and Dispatch (no intake directory; all sends require user confirmation).
 
 ---
 
@@ -281,6 +283,25 @@ CycleResult schema from `spec-ocas-shared-schemas.md`.
 
 ### Consumption
 Mentor reads CycleResult files from its intake directory during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. On receiving a result with `decision: promote`, Mentor may emit a VariantDecision to Forge. On `abort`, Mentor logs the failure and may re-queue. Processed files move to `intake/processed/`.
+
+---
+
+## Praxis → Dispatch Action Handoff
+
+### Purpose
+Praxis passes communication action decisions to Dispatch for drafting and delivery. This is a session-scoped handoff — no intake directory is used.
+
+### Path
+None. Communication is in-session: Praxis proposes a communication action and Dispatch executes within the same session context.
+
+### Producer
+Praxis. Occurs when a behavior decision or outcome requires external communication (e.g., a follow-up message, a commitment confirmation).
+
+### Consumption
+Dispatch receives the action description directly in-session from Praxis. Dispatch drafts accordingly and awaits explicit user approval before any send operation.
+
+### Notes
+This interface uses no file drop because Dispatch never operates autonomously on queued actions — all sends require user confirmation in the active session. A file-drop pattern would imply autonomous send capability that Dispatch does not have.
 
 ---
 

@@ -1,9 +1,11 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.2
+Spec Version: 1.3
 Author: Indigo Karasu
 
-Changes from 1.1: updated improvement loop to include Fellow as empirical evaluation engine between Mentor and Forge; updated Mentor description to include Workflow Plans system; updated shared schemas list to include ExperimentRequest, CycleResult, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision; updated interfaces section to reference new Mentor↔Fellow intake paths; added spec-ocas-workflow-plans.md to specification index.
+Changes from 1.2: updated improvement loop to include Fellow as empirical evaluation engine between Mentor and Forge; updated Mentor description to include Workflow Plans system; updated shared schemas list to include ExperimentRequest, CycleResult, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision; updated interfaces section to reference new Mentor↔Fellow intake paths; added spec-ocas-workflow-plans.md to specification index.
+
+Changes from 1.2: noted Relay as not yet active, with build spec in Todo/Relay/.
 
 ---
 
@@ -60,7 +62,7 @@ Skills that improve the system itself.
 ### Interface Surfaces
 
 - **Vesper** — daily briefing generator. Aggregates signals from Corvus, Dispatch, Rally, and other skills into morning and evening briefings. Presents outcomes without exposing internal processes.
-- **Relay** — device gateway. Normalizes inbound device signals and manages permissions. Private skill.
+- **Relay** — device gateway. Normalizes inbound device signals and manages permissions. Private skill. Build spec exists in `Todo/Relay/`; not yet active.
 
 ---
 

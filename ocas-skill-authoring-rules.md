@@ -1,9 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.3.0
+Version: 2.3.1
 Author: Indigo Karasu
 
-Changes from 2.2.0: added Background Tasks section covering cron vs. heartbeat decision rules, idempotent registration pattern, SKILL.md declaration requirement, and which skills need background tasks; added Background tasks to Required SKILL.md Sections for System Skills; added background task check to Structural Check; added background tasks to Preferred Design Sequence.
+Changes from 2.3.0: fixed duplicate step 7 in Preferred Design Sequence (renumbered steps 7–9 to 7–10); noted ocas-triage as planned (no build spec yet) in responsibility boundaries list.
 
 ---
 
@@ -260,7 +260,7 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-triage
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-triage (planned — task graph and priority queues; no build spec yet)
 
 Each skill build spec includes a Responsibility Boundary section.
 
@@ -334,9 +334,9 @@ Verify:
 5. Identify inter-skill interfaces needed (check `spec-ocas-interfaces.md`)
 6. Determine if the skill needs background tasks — if so, choose cron vs. heartbeat and define job names and schedules
 7. Choose the smallest viable package
-7. Decide what belongs in SKILL.md versus support files
-8. Define routing tests and structural checks
-9. Write the self-contained build spec for the coder LLM
+8. Decide what belongs in SKILL.md versus support files
+9. Define routing tests and structural checks
+10. Write the self-contained build spec for the coder LLM
 
 ---
 
