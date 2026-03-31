@@ -1,7 +1,9 @@
 # OCAS Shared Schemas
 
-Spec Version: 1.2
+Spec Version: 1.3
 Author: Indigo Karasu
+
+Changes from 1.2: added PortfolioOutcomeRecord schema (Rally domain extension); added ConsumptionSignal and ItemRecord schemas (Taste domain extensions); added EvaluationResult schema (Mentor domain extension).
 
 Changes from 1.0: updated JournalEntry minimum fields to match journal spec v1.3 (added journal_type, journal_spec_version); updated ConfigBase to reference central storage path; added InsightProposal schema (Corvus output); added BehavioralSignal schema (Corvus→Praxis); added VariantProposal and VariantDecision schemas (Mentor→Forge); clarified extension rules.
 
@@ -322,6 +324,120 @@ Written to: `~/openclaw/data/ocas-mentor/intake/{cycle_id}.json`
   "artifacts_ref": "string | null — path to variant artifacts",
   "rollback_ref": "string | null — path to rollback snapshot",
   "abort_reason": "string | null — populated when decision is abort"
+}
+```
+
+---
+
+## Domain Extension Schemas
+
+The schemas below are skill-specific extensions of shared base schemas. They are documented here for cross-skill discoverability. Each extension follows the rules in the Extension Rules section — base fields are preserved.
+
+---
+
+### PortfolioOutcomeRecord
+
+**Extends:** JournalEntry (decision field)
+**Used by:** Rally (writes), Vesper (reads via cooperative interface)
+**Written to:** `~/openclaw/data/ocas-rally/reports/YYYY-MM-DD-daily.json`
+
+```json
+{
+  "report_date": "string — ISO 8601 date",
+  "portfolio_value": "number — total portfolio value in USD",
+  "daily_return": "number — daily return as decimal (e.g., 0.012 = 1.2%)",
+  "ytd_return": "number — year-to-date return",
+  "drawdown": "number — current drawdown from peak as decimal",
+  "regime_score": "number — 0.0 to 1.0, market regime assessment",
+  "top_movers": [
+    {
+      "ticker": "string",
+      "pct_change": "number",
+      "direction": "string — up|down"
+    }
+  ],
+  "allocation_changes": [
+    {
+      "ticker": "string",
+      "from_weight": "number",
+      "to_weight": "number",
+      "reason": "string"
+    }
+  ],
+  "risk_flags": ["string — active risk constraint violations or warnings"],
+  "factor_ic": "object | null — information coefficient by factor, if computed",
+  "generated_at": "string — ISO 8601"
+}
+```
+
+Vesper reads `top_movers`, `risk_flags`, `daily_return`, and `allocation_changes` for briefing inclusion.
+
+---
+
+### ConsumptionSignal
+
+**Extends:** Signal (payload.data)
+**Used by:** Taste (writes internally)
+**Written to:** `~/openclaw/data/ocas-taste/signals.jsonl`
+
+This schema is Taste-internal. It is not emitted to Elephas. It represents a single observed consumption event.
+
+```json
+{
+  "signal_id": "string — sig_{hash}",
+  "timestamp": "string — ISO 8601",
+  "source_skill": "ocas-taste",
+  "source_journal_type": "Observation",
+  "payload": {
+    "type": "string — item|venue|media|product|concept",
+    "item_id": "string — reference to ItemRecord",
+    "action": "string — consumed|saved|skipped|dismissed|rated",
+    "rating": "number | null — 1–5 if rated",
+    "context": "string | null — situational context if available"
+  },
+  "confidence": "string — high|med|low",
+  "status": "string — active|consumed"
+}
+```
+
+---
+
+### ItemRecord
+
+**Used by:** Taste (writes internally)
+**Written to:** `~/openclaw/data/ocas-taste/items.jsonl`
+
+```json
+{
+  "item_id": "string — item_{hash}",
+  "item_type": "string — venue|media|product|concept",
+  "name": "string",
+  "attributes": "object — type-specific attributes (e.g., cuisine, genre, category)",
+  "first_seen": "string — ISO 8601",
+  "last_seen": "string — ISO 8601",
+  "signal_count": "number",
+  "aggregate_strength": "number — 0.0 to 1.0"
+}
+```
+
+---
+
+### EvaluationResult
+
+**Used by:** Mentor (writes internally)
+**Written to:** `~/openclaw/data/ocas-mentor/evaluations/{evaluation_id}.json`
+
+```json
+{
+  "evaluation_id": "string — eval_{hash}",
+  "target_skill": "string",
+  "evaluated_at": "string — ISO 8601",
+  "evaluation_window_runs": "number",
+  "okr_scores": "object — universal and domain OKR scores",
+  "trend": "string — improving|stable|degrading",
+  "regression_flags": ["string — OKRs below threshold"],
+  "recommendation": "string — continue|investigate|propose_variant",
+  "notes": "string | null"
 }
 ```
 

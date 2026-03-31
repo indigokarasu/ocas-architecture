@@ -1,7 +1,9 @@
 # OCAS Workflow Plans
 
-Spec Version: 1.0
+Spec Version: 1.1
 Author: Indigo Karasu
+
+Changes from 1.0: added Expected Bundled Plans section; added plan init registration pattern; added notes on graceful skill-absent handling in plan runs.
 
 ---
 
@@ -237,3 +239,35 @@ Mentor exposes these commands for plan management:
 4. Mentor discovers new files at next `mentor.plan.list` or `mentor.plan.run` invocation.
 
 Do not hardcode user-specific values in plan files. Use parameters for all variable inputs.
+
+---
+
+## Expected Bundled Plans
+
+The following skills are expected to ship bundled plans. Plans are copied to `~/openclaw/data/ocas-mentor/plans/` during `mentor.init`. Existing files are never overwritten (user modifications are preserved).
+
+| Skill | Plan ID | Description |
+|---|---|---|
+| ocas-scout | `contact-enrichment` | Research a contact by name/email, enrich via Weave, emit entities |
+| ocas-sift | `research-deep-dive` | Multi-source research on a topic: broad scan → depth pass → entity extraction |
+| ocas-rally | `portfolio-rebalance` | Signal refresh → scoring → allocation review → optional trade plan |
+| ocas-voyage | `trip-planning` | Destination research → itinerary construction → accommodation options |
+| ocas-taste | `preference-scan` | Ingest recent browsing and media activity → update preference model |
+
+### Plan Init Registration
+
+Skills that bundle plans must add a copy step to their `{skill}.init` command:
+
+```
+Copy all *.plan.md files from {skill}/references/plans/ to ~/openclaw/data/ocas-mentor/plans/
+Skip any file that already exists at the destination (preserve user modifications)
+Log each copy operation as a DecisionRecord
+```
+
+### Absent Skill Handling
+
+If a plan step references a skill that is not installed:
+- Treat it as a step failure.
+- Apply the step's `on_failure` policy (`abort`, `skip`, or `retry`).
+- Do not silently succeed.
+- Log the missing skill name and step ID to `decisions.jsonl`.
