@@ -1,6 +1,6 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.4.0
+Version: 2.4.1
 Author: Indigo Karasu
 
 Changes from 2.3.1: added Variant Naming Convention section; standardized HEARTBEAT.md registration language; added ocas-custodian to responsibility boundaries list; added Ontology Mapping to required SKILL.md sections for system skills; added Bundled Workflow Plans section.
@@ -276,7 +276,7 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage (planned — task graph and priority queues; no build spec yet)
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot
 
 Each skill build spec includes a Responsibility Boundary section.
 
