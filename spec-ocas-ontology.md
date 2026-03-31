@@ -1,9 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.3
+Spec Version: 1.4
 Author: Indigo Karasu
 
-Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
+Changes from 1.3 (v1.4): Added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
 
 ---
 
@@ -307,6 +307,11 @@ Skills not in this table do not extract entities and do not emit Signals to Elep
 | ocas-bower | — | — | — | DigitalArtifact | Drive files/folders; structural pattern signals (optional) |
 | ocas-triage | — | — | — | — | No entity extraction; queue and scheduling only |
 | ocas-relay | — | — | — | DigitalArtifact | Device attachments only; no Elephas emission |
+| ocas-elephas | — | — | — | — | Chronicle writer only; no entity extraction from user data |
+| ocas-mentor | — | — | — | — | Orchestration engine; no entity extraction |
+| ocas-praxis | — | — | — | — | Behavioral refinement; no entity extraction |
+| ocas-forge | — | — | — | — | Skill architect; no entity extraction |
+| ocas-fellow | — | — | — | — | Experimentation engine; no entity extraction |
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -336,6 +341,12 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-bower | Optional | May emit DigitalArtifact signals for structural Drive discoveries |
 | ocas-triage | No | Does not emit entity signals to Chronicle |
 | ocas-relay | No | Device attachments stored locally; downstream skills handle Chronicle ingestion |
+| ocas-custodian | No | System health only; no entity signals |
+| ocas-elephas | N/A | Reads Signals and writes Chronicle facts; not an emitter |
+| ocas-mentor | No | Orchestration engine; no entity signals |
+| ocas-praxis | No | Behavioral refinement; no entity signals |
+| ocas-forge | No | Skill architect; no entity signals |
+| ocas-fellow | No | Experimentation engine; no entity signals |
 
 ---
 
