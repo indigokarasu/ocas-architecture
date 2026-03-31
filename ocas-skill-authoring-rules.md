@@ -1,9 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.3.1
+Version: 2.4.0
 Author: Indigo Karasu
 
-Changes from 2.3.0: fixed duplicate step 7 in Preferred Design Sequence (renumbered steps 7–9 to 7–10); noted ocas-triage as planned (no build spec yet) in responsibility boundaries list.
+Changes from 2.3.1: added Variant Naming Convention section; standardized HEARTBEAT.md registration language; added ocas-custodian to responsibility boundaries list; added Ontology Mapping to required SKILL.md sections for system skills; added Bundled Workflow Plans section.
 
 ---
 
@@ -210,7 +210,21 @@ Timezone defaults to `America/Los_Angeles`. Update via `cron.update` once the us
 
 ### HEARTBEAT.md
 
-The workspace `HEARTBEAT.md` at `~/.openclaw/workspace/HEARTBEAT.md` is the coordination point for all lightweight heartbeat tasks. Skills that contribute heartbeat entries append to this file during `{skill}.init`, checking for their entry before appending to avoid duplicates.
+The workspace `HEARTBEAT.md` at `~/.openclaw/workspace/HEARTBEAT.md` is the coordination point for all lightweight heartbeat tasks. Skills that contribute heartbeat entries register during `{skill}.init`.
+
+**Standard registration pattern (use this exact wording in every SKILL.md):**
+
+> During `{skill}.init`, append to `~/.openclaw/workspace/HEARTBEAT.md` if the entry is not already present (check before appending to ensure idempotence):
+> ```
+> {skill-short}:{task-short}: {command}
+> ```
+
+Example for Corvus:
+```
+corvus:light: corvus.analyze.light
+```
+
+Every skill that uses heartbeat must include this pattern verbatim in its SKILL.md `## Background tasks` section, substituting `{skill-short}:{task-short}` and `{command}` with the actual values.
 
 If `HEARTBEAT.md` is empty (only blank lines and headers), OpenClaw skips heartbeat runs entirely. Keep it non-empty if any skill needs heartbeat execution.
 
@@ -248,6 +262,8 @@ System skills must include:
 
 **Optional Skill Cooperation** — other skills this skill may cooperate with when present, but never depend on.
 
+**Ontology Mapping** — which entity types from `spec-ocas-ontology.md` this skill extracts, manages, or queries. Skills that extract no entities and query none may omit this section.
+
 **Journal Outputs** — which journal type(s) this skill emits.
 
 **Storage Layout** — the skill's data and journal paths under `~/openclaw/`.
@@ -260,7 +276,7 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-triage (planned — task graph and priority queues; no build spec yet)
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage (planned — task graph and priority queues; no build spec yet)
 
 Each skill build spec includes a Responsibility Boundary section.
 
@@ -295,6 +311,53 @@ If a cooperating skill is absent, the skill must still function normally.
 - Template residue: placeholders never concretized
 - Storage inside the skill package directory
 - Undocumented inter-skill interfaces
+
+---
+
+## Variant Naming Convention
+
+Skill variants follow a standardized naming format for identification in journals, OKR evaluations, and promotion decisions.
+
+### Format
+
+```
+{skill-id}-variant-{YYYYMMDD}
+```
+
+Examples:
+- `ocas-rally-variant-20260307`
+- `ocas-scout-variant-20260315`
+- `ocas-sift-variant-20260401`
+
+### Rules
+
+- The date is the date the variant was created (not proposed or promoted).
+- If multiple variants of the same skill exist on the same date, append `-2`, `-3`, etc.: `ocas-rally-variant-20260307-2`.
+- Variant IDs appear in: VariantProposal, VariantDecision, CycleResult, and journal entries for that variant's runs.
+- The variant's `skill_version` field in its journals should reflect its version string (e.g., `1.2.0-variant-20260307`), distinct from the champion's version.
+
+---
+
+## Bundled Workflow Plans
+
+Skills that are commonly invoked as part of multi-step cross-skill workflows should ship bundled plans. Plans are stored at `references/plans/` in the skill package and copied to `~/openclaw/data/ocas-mentor/plans/` during Mentor initialization.
+
+Skills expected to bundle plans:
+
+| Skill | Plan ID | Description |
+|---|---|---|
+| ocas-scout | `contact-enrichment` | Full research pipeline for a known contact |
+| ocas-sift | `research-deep-dive` | Multi-source research on a topic or entity |
+| ocas-rally | `portfolio-rebalance` | Signal refresh → scoring → allocation review |
+| ocas-voyage | `trip-planning` | Destination research → itinerary → accommodation |
+| ocas-taste | `preference-scan` | Ingest recent activity → update preference model |
+
+To add a bundled plan:
+1. Create `references/plans/{plan_id}.plan.md` following `spec-ocas-workflow-plans.md` format.
+2. Add a row to the skill's Support file map in SKILL.md referencing the plan.
+3. Add plan copying to the skill's `init` command: copy `references/plans/*.plan.md` to `~/openclaw/data/ocas-mentor/plans/`, skipping files already present.
+
+See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
 ---
 

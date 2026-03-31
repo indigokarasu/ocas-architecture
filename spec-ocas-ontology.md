@@ -1,9 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.1
+Spec Version: 1.2
 Author: Indigo Karasu
 
-Changes from 1.0: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference.
+Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments.
 
 ---
 
@@ -282,6 +282,53 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 ---
 
+## Skill Entity Extraction Ownership
+
+Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
+
+Skills not in this table do not extract entities and do not emit Signals to Elephas.
+
+| Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
+|---|---|---|---|---|---|
+| ocas-scout | Person, AI | — | — | DigitalArtifact | Extracts people and their public profiles |
+| ocas-sift | Person, AI | Place | Event, Idea | DigitalArtifact | General entity extraction from research |
+| ocas-look | Person | Place | Event, Action | DigitalArtifact | Entities extracted from images |
+| ocas-thread | — | — | Idea | — | Research topic threads (interests, sources) |
+| ocas-corvus | — | — | Idea | Signal | Patterns and anomalies; behavioral signals |
+| ocas-weave | Person | — | — | — | Social graph; Person nodes only |
+| ocas-taste | — | Place | Action | DigitalArtifact | Venues, consumed items, behavioral actions |
+| ocas-voyage | — | Place | Event, Action | — | Venues, trip events, booking actions |
+| ocas-rally | — | — | Event | Thing | Market events; securities as Things |
+| ocas-dispatch | Person | — | Action | DigitalArtifact | Contacts, sent/received messages |
+| ocas-vesper | — | — | — | — | Aggregates only; does not extract entities |
+| ocas-custodian | — | — | — | — | System health only; no entity extraction |
+
+**Rules:**
+- A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
+- Skills that query Chronicle or Weave for entity context (read-only consumers) are not listed here — this table covers extraction and emission only.
+- Skills not listed above (Elephas, Praxis, Mentor, Forge, Fellow) do not extract entities from user data. Elephas is the Chronicle writer; others operate on skill-internal data.
+
+---
+
+## Signal Emission Responsibilities
+
+Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
+
+| Skill | Emit Signals to Elephas? | Condition |
+|---|---|---|
+| ocas-scout | Yes | After each completed research request, for each extracted entity with confidence ≥ med |
+| ocas-sift | Yes | For entities and relationships extracted with confidence ≥ med |
+| ocas-look | Yes | For entities identified in processed images |
+| ocas-thread | Yes | For Chronicle candidates only (sessions ≥ 3, long_clicks ≥ 3) |
+| ocas-corvus | Optional | For behavioral signals routed to Praxis; does not emit entity signals |
+| ocas-weave | Optional | May emit Person signals for Chronicle promotion |
+| ocas-taste | No | Taste maintains its own preference model; does not emit to Chronicle |
+| ocas-voyage | No | Voyage manages trip state; does not emit entity signals to Chronicle |
+| ocas-rally | No | Rally maintains its own portfolio data; does not emit to Chronicle |
+| ocas-dispatch | No | Dispatch manages communication state; does not emit entity signals |
+
+---
+
 ## Expected Scale
 
 Nodes: 100k–500k
@@ -292,10 +339,10 @@ Target hardware: Mac Studio, 512GB–1TB RAM, embedded LadybugDB.
 
 ## Usage by Skills
 
-Skills that extract entities (Sift, Scout, Look, Corvus, Thread) emit candidates using the types defined here.
+Skills that extract entities (Sift, Scout, Look, Corvus, Thread, Weave, Taste, Voyage) must map their extracted data to the types defined here. See the Skill Entity Extraction Ownership table above for the full mapping.
 
-Skills that query entities (Weave, Vesper, Dispatch, Taste, Voyage) expect the types defined here.
+Skills that query entities (Weave, Vesper, Dispatch, Taste, Voyage) expect the types defined here when reading from Chronicle or Weave's social graph.
 
-Weave maintains its own social graph and is a Signal emitter (proposes new Person entities) and Chronicle consumer (reads Entity records for enrichment). Both are optional.
+Skills that emit Signals to Elephas must set `payload.type` to the ontology type of the primary entity in the signal (e.g., `Person`, `Place`, `Idea`).
 
 Elephas is the only skill that writes confirmed facts to Chronicle.

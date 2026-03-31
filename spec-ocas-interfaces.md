@@ -1,9 +1,9 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.2
+Spec Version: 1.3
 Author: Indigo Karasu
 
-Changes from 1.1: added Praxis→Dispatch Action Handoff entry documenting the session-scoped informal interface between Praxis and Dispatch (no intake directory; all sends require user confirmation).
+Changes from 1.2: added Rally → Vesper Portfolio Outcome cooperative read interface; added Vesper → Dispatch Briefing Delivery session-scoped interface; added Cooperative Query Interfaces section documenting five informal read-only cross-skill queries (Sift↔Thread, Sift↔Weave, Scout↔Weave, Taste↔Sift, Voyage↔Sift); added Rally and Vesper to polling cadence table.
 
 ---
 
@@ -241,6 +241,50 @@ Candidate schema from `spec-ocas-shared-schemas.md`. Bad candidates (raw visit r
 
 ---
 
+## Rally → Vesper Portfolio Outcome
+
+### Purpose
+Vesper reads Rally's latest daily report during briefing generation to include portfolio outcomes and allocation changes.
+
+### Path
+This is a cooperative read interface — no intake directory is used. Vesper reads directly from Rally's data directory:
+
+```
+~/openclaw/data/ocas-rally/reports/{YYYY-MM-DD}-daily.json
+```
+
+Vesper reads the most recent file matching `*-daily.json` in that directory.
+
+### Format
+PortfolioOutcomeRecord schema from `spec-ocas-shared-schemas.md`. If no file exists or the most recent file is more than 48 hours old, Vesper skips Rally data for that briefing without error.
+
+### Consumption
+Vesper checks this path during `vesper.briefing.morning` and `vesper.briefing.evening`. No file is written back; Rally's data is read-only from Vesper's perspective.
+
+### Notes
+Rally writes its daily report during `rally.report.daily`. The filename format is `YYYY-MM-DD-daily.json`. Rally does not write to Vesper's intake directory — Vesper pulls when it needs the data.
+
+---
+
+## Vesper → Dispatch Briefing Delivery
+
+### Purpose
+Vesper requests Dispatch to deliver a completed briefing via a user-preferred channel (e.g., iMessage, email).
+
+### Path
+None. This is a session-scoped handoff — no intake directory is used.
+
+### Producer
+Vesper. Occurs when `vesper.briefing.morning`, `vesper.briefing.evening`, or `vesper.briefing.manual` is invoked with a delivery channel configured in `config.json`.
+
+### Consumption
+Dispatch receives the briefing content directly in-session from Vesper. Dispatch drafts the delivery message and awaits explicit user confirmation before sending.
+
+### Notes
+Vesper never sends directly. Dispatch is always the sending agent. If Dispatch is not present, Vesper presents the briefing inline without delivery. This interface uses no file drop for the same reason as Praxis → Dispatch: Dispatch never operates autonomously on queued sends.
+
+---
+
 ## Mentor → Fellow Experiment Request
 
 ### Purpose
@@ -305,6 +349,47 @@ This interface uses no file drop because Dispatch never operates autonomously on
 
 ---
 
+## Cooperative Query Interfaces
+
+Cooperative query interfaces are read-only cross-skill data accesses that do not use intake directories. They are optional — the requesting skill must degrade gracefully if the cooperating skill's data is absent or unavailable.
+
+Cooperative reads are permitted for any skill to any other skill's data directory. The rules:
+- The reading skill opens data as read-only. It must not write, move, or delete files.
+- The reading skill must not block on missing data. If the target file or directory does not exist, it proceeds without that data.
+- The reading skill documents its cooperative reads in its SKILL.md `## Optional skill cooperation` section.
+
+The following cooperative reads are documented here because they are load-bearing for at least one skill's normal operation:
+
+### Sift ↔ Thread: Query Rewriting
+
+Sift may read Thread's active research context to improve query specificity. Thread's current context is available at:
+```
+~/openclaw/data/ocas-thread/active_context.json
+```
+If absent, Sift proceeds with the unmodified query. Thread never reads from Sift.
+
+### Sift ↔ Weave: Entity Disambiguation
+
+Sift may query Weave's social graph database to disambiguate entity references (e.g., resolving "John" to a specific person when multiple matches exist). Weave's LadybugDB is at:
+```
+~/openclaw/db/ocas-weave/
+```
+Sift opens this database as read-only. If absent, Sift proceeds with unresolved references.
+
+### Scout ↔ Weave: Identity Context
+
+Scout may read Weave's social graph to pre-populate identity context before starting a research request (known aliases, emails, relationships). Same database path as above. Scout never writes to Weave.
+
+### Taste ↔ Sift: Item Enrichment
+
+Taste may invoke Sift to enrich an extracted item (e.g., a restaurant, product, or media title) with additional structured data. This is a direct skill invocation in-session, not a file read. If Sift is absent, Taste records the item with available data only.
+
+### Voyage ↔ Sift: Venue and Route Enrichment
+
+Voyage may invoke Sift to enrich venue details, check transport options, or validate hours and pricing. Direct skill invocation in-session. If Sift is absent, Voyage proceeds with available data.
+
+---
+
 ## Polling and Timing
 
 Skills poll their intake directories on their own schedule. There are no push notifications or event queues.
@@ -317,7 +402,7 @@ Recommended polling cadences:
 | Mentor | Journals directory + Fellow CycleResults | Every `mentor.heartbeat.light` (e.g., every 15 min) |
 | Praxis | Behavioral signals from Corvus | Every Praxis scheduled pass or on-demand |
 | Forge | Variant proposals and decisions from Mentor | Every Forge cycle or on-demand |
-| Vesper | Opportunity signals from Corvus | At briefing generation time |
+| Vesper | Opportunity signals from Corvus + Rally daily report (cooperative read) | At briefing generation time |
 | Corvus | Research threads from Thread | During analysis cycles |
 | Fellow | ExperimentRequest from Mentor | On `fellow.experiment.run` invocation |
 
