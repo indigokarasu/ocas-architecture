@@ -6,6 +6,15 @@ Format: `[spec-file] vX.Y — description`
 
 ---
 
+## 2026-03-31
+
+### spec-ocas-ontology.md v1.4
+- Added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership table
+- Added corresponding entries to Signal Emission Responsibilities table
+- Completed skill inventory coverage for all 22 OCAS system skills
+
+---
+
 ## 2026-03-30
 
 ### spec-ocas-interfaces.md v1.3
