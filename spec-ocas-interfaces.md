@@ -1,8 +1,9 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.3
+Spec Version: 1.4
 Author: Indigo Karasu
 
+Changes from 1.3: added Sands → Vesper Schedule Brief Intake interface; added Sands to polling cadence table.
 Changes from 1.2: added Rally → Vesper Portfolio Outcome cooperative read interface; added Vesper → Dispatch Briefing Delivery session-scoped interface; added Cooperative Query Interfaces section documenting five informal read-only cross-skill queries (Sift↔Thread, Sift↔Weave, Scout↔Weave, Taste↔Sift, Voyage↔Sift); added Rally and Vesper to polling cadence table.
 
 ---
@@ -163,6 +164,36 @@ VariantDecision schema from `spec-ocas-shared-schemas.md`.
 
 ### Consumption
 Forge reads the decision and acts: promotes the challenger to champion if decision is `promote`, continues testing if `continue_testing`, or archives if `archive` or `reject`. Emergency rollback is handled immediately regardless of polling cycle.
+
+---
+
+## Sands → Vesper Schedule Brief Intake
+
+### Purpose
+Sands delivers structured schedule briefs to Vesper for inclusion in morning and evening briefings.
+
+### Path
+```
+~/openclaw/data/ocas-vesper/intake/{proposal_id}.json
+```
+
+### Producer
+Sands. Written during `sands.brief` (both morning and evening modes).
+
+### Format
+InsightProposal schema from `spec-ocas-shared-schemas.md` with the following field values:
+- `proposal_type`: `routine_prediction`
+- `description`: `"[SANDS BRIEF: EVENING | MORNING] YYYY-MM-DD"`
+- `confidence_score`: `1.0`
+- `suggested_follow_up`: full schedule payload JSON-encoded as a string (see `references/vesper_emit_format.md` in the sands package for the payload structure)
+
+Vesper must JSON-parse `suggested_follow_up` to obtain the structured schedule data.
+
+### Consumption
+Vesper checks its intake during `vesper.briefing.morning`, `vesper.briefing.evening`, or `vesper.briefing.manual`. Processed files move to `intake/processed/`.
+
+### Notes
+Sands writes directly to Vesper intake — it does not route through Corvus. Schedule briefs are deterministic, user-invoked outputs, not pattern-detected insights.
 
 ---
 
@@ -402,7 +433,8 @@ Recommended polling cadences:
 | Mentor | Journals directory + Fellow CycleResults | Every `mentor.heartbeat.light` (e.g., every 15 min) |
 | Praxis | Behavioral signals from Corvus | Every Praxis scheduled pass or on-demand |
 | Forge | Variant proposals and decisions from Mentor | Every Forge cycle or on-demand |
-| Vesper | Opportunity signals from Corvus + Rally daily report (cooperative read) | At briefing generation time |
+| Vesper | Opportunity signals from Corvus + Schedule briefs from Sands + Rally daily report (cooperative read) | At briefing generation time |
+| Sands | n/a — Sands writes to Vesper intake, does not poll its own intake | On `sands.brief` invocation |
 | Corvus | Research threads from Thread | During analysis cycles |
 | Fellow | ExperimentRequest from Mentor | On `fellow.experiment.run` invocation |
 
