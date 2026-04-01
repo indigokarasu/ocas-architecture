@@ -3,7 +3,7 @@
 Spec Version: 1.4
 Author: Indigo Karasu
 
-Changes from 1.3 (v1.4): Added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
+Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership and Signal Emission tables; added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
 
 ---
 
@@ -299,6 +299,7 @@ Skills not in this table do not extract entities and do not emit Signals to Elep
 | ocas-taste | — | Place | Action | DigitalArtifact | Venues, consumed items, behavioral actions |
 | ocas-voyage | — | Place | Event, Action | — | Venues, trip events, booking actions |
 | ocas-rally | — | — | Event | Thing | Market events; securities as Things |
+| ocas-sands | — | Place | Event | — | Event locations resolved via Google Places API; calendar events created/modified |
 | ocas-dispatch | Person | — | Action | DigitalArtifact | Contacts, sent/received messages |
 | ocas-vesper | — | — | — | — | Aggregates only; does not extract entities |
 | ocas-custodian | — | — | — | — | System health only; no entity extraction |
@@ -335,6 +336,7 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-taste | No | Taste maintains its own preference model; does not emit to Chronicle |
 | ocas-voyage | No | Voyage manages trip state; does not emit entity signals to Chronicle |
 | ocas-rally | No | Rally maintains its own portfolio data; does not emit to Chronicle |
+| ocas-sands | No | Sands manages calendar state; Place and Event data retained in decisions.jsonl only; does not emit to Chronicle |
 | ocas-dispatch | No | Dispatch manages communication state; does not emit entity signals |
 | ocas-spot | Yes | On confirmed booking: Place for new venues, Concept/Event for appointments |
 | ocas-haiku | No | Does not emit entity signals to Chronicle |
@@ -360,7 +362,7 @@ Target hardware: Mac Studio, 512GB–1TB RAM, embedded LadybugDB.
 
 ## Usage by Skills
 
-Skills that extract entities (Sift, Scout, Look, Corvus, Thread, Weave, Taste, Voyage, Spot) must map their extracted data to the types defined here. See the Skill Entity Extraction Ownership table above for the full mapping.
+Skills that extract entities (Sift, Scout, Look, Corvus, Thread, Weave, Taste, Voyage, Spot, Sands) must map their extracted data to the types defined here. See the Skill Entity Extraction Ownership table above for the full mapping.
 
 Skills that query entities (Weave, Vesper, Dispatch, Taste, Voyage, Haiku) expect the types defined here when reading from Chronicle or Weave's social graph.
 
