@@ -1,6 +1,6 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.4
+Spec Version: 1.5
 Author: Indigo Karasu
 
 Changes from 1.3 (v1.4): added ocas-sands to Skill Entity Extraction Ownership and Signal Emission tables; added ocas-elephas, ocas-mentor, ocas-praxis, ocas-forge, ocas-fellow, and ocas-custodian to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables for complete skill inventory coverage. Changes from 1.1: added source_skill and record_time to Entity required fields; added possible_matches and merge_history to Entity fields; defined identifier type vocabulary and JSON serialization format; defined confidence derivation rules (numeric → label); decomposed valid_time into valid_from / valid_until for unambiguous range encoding; defined journal type semantics for source_journal_type; added signal delivery mechanism; added skill write permissions as a formal rule; added Chronicle-to-skill reference model (Chronicle stores skill-namespaced identifiers, not copies); added acquaintance_of to Entity-Entity relationship types; added storage layout convention reference. Changes from 1.1 (v1.2): added Skill Entity Extraction Ownership table; added Signal Emission Responsibilities table; updated Usage by Skills section with explicit per-skill entity type assignments. Changes from 1.2 (v1.3): added ocas-spot, ocas-haiku, ocas-bower, ocas-triage, ocas-relay to Skill Entity Extraction Ownership and Signal Emission tables.
