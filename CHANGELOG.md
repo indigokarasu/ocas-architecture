@@ -1,3 +1,14 @@
+## [2026-04-02] Architecture Sync
+
+### Changed
+- spec-ocas-ontology.md: Updated to v1.5; verified all 19 OCAS skills present in entity extraction and signal emission tables
+- spec-ocas-interfaces.md: Updated to v1.5; verified polling cadence coverage for background task skills
+- ocas-skill-authoring-rules.md: Updated to v2.5.0; verified complete responsibility boundaries coverage
+
+### Verified
+- All 19 discovered OCAS skills (bower, corvus, custodian, elephas, fellow, forge, look, mentor, praxis, rally, sands, scout, sift, spot, taste, triage, vesper, voyage, weave) have spec coverage
+- Schema compliance audit completed for all skills; sands fixed for full conformance
+
 # CHANGELOG
 
 All notable changes to OCAS architecture specifications are documented here.
