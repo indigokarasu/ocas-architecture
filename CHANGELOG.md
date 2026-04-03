@@ -1,3 +1,16 @@
+## [2026-04-02] Automation Compliance Update
+
+### Changed
+- ocas-skill-authoring-rules.md v2.6.0: Updated background task skill lists to reflect current state
+  - Added ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch to cron job list
+  - Removed ocas-dispatch from purely reactive list
+  - Clarified universal self-update cron is not counted as operational background task
+  - Updated cron CLI syntax to match openclaw cron add specification (--session, --message, --light-context, --tz)
+- spec-ocas-architecture.md: Added missing skills to layer registry
+  - Sands and Custodian added to Execution Layer
+  - Haiku added to Interface Surfaces
+  - Vesper description updated to include Sands as signal source
+
 ## [2026-04-02] Architecture Sync
 
 ### Changed
