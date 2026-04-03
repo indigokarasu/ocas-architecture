@@ -1,9 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.5.0
+Version: 2.6.0
 Author: Indigo Karasu
 
-Changes from 2.3.1: added Variant Naming Convention section; standardized HEARTBEAT.md registration language; added ocas-custodian to responsibility boundaries list; added Ontology Mapping to required SKILL.md sections for system skills; added Bundled Workflow Plans section.
+Changes from 2.5.0: updated Background Tasks skill lists to reflect current state (added ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch to cron list); clarified universal self-update cron is not counted as operational background task; updated cron CLI syntax to match openclaw cron add specification (--session, --message, --light-context, --tz flags); removed ocas-dispatch from purely reactive list.
 
 ---
 
@@ -171,11 +171,13 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 
 ### Which skills need background tasks
 
-Skills with cron jobs: ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread.
+**Note:** All skills have a `{skill}:update` cron job at midnight for self-updates from GitHub. This universal update task is not counted below — the lists below refer to skills with _operational_ background tasks beyond self-update.
 
-Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (intake poll), ocas-forge (intake poll).
+Skills with operational cron jobs: ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch.
 
-Purely reactive skills need neither: ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-dispatch, ocas-fellow.
+Skills with heartbeat entries only: ocas-mentor (light pass), ocas-corvus (light pass), ocas-praxis (intake poll), ocas-forge (intake poll), ocas-haiku (post-opportunity).
+
+Skills with no operational background tasks (self-update only): ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow.
 
 ### Idempotent registration
 
@@ -201,12 +203,22 @@ Skills with no background tasks omit this section entirely.
 
 ### Cron job conventions
 
-All isolated cron jobs use:
-- `sessionTarget: isolated`
-- `lightContext: true` to minimize token cost
-- `wakeMode: next-heartbeat` unless immediate execution is required
+All isolated cron jobs use these flags with `openclaw cron add`:
+- `--session isolated` — dedicated fresh agent session
+- `--light-context` — skip workspace bootstrap to minimize token cost
+- `--tz America/Los_Angeles` — timezone for schedule evaluation (update once user's timezone is known)
 
-Timezone defaults to `America/Los_Angeles`. Update via `cron.update` once the user's timezone is known.
+For main-session jobs, use `--session main --system-event "text"` with `--wake now` or `--wake next-heartbeat`.
+
+Registration syntax:
+```bash
+openclaw cron add --name "{skill}:{task}" --cron "M H D Mo DoW" \
+  --session isolated --message "{skill}.{command}" --light-context --tz America/Los_Angeles
+```
+
+One-shot jobs use `--at "ISO8601"` instead of `--cron`. Interval jobs use `--every "duration"`.
+
+Manage existing jobs: `openclaw cron list`, `openclaw cron edit <id>`, `openclaw cron rm <id>`, `openclaw cron run <id>` (manual trigger).
 
 ### HEARTBEAT.md
 

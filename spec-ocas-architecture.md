@@ -44,6 +44,8 @@ Skills that plan and execute actions in the world.
 - **Voyage** — travel planning, itinerary construction, and reservation management.
 - **Dispatch** — communications management. Inbox triage, thread tracking, draft generation, and identity-safe public communication. Private skill.
 - **Rally** — governed portfolio research, candidate scoring, allocation planning, and trade planning.
+- **Sands** — calendar management. Natural-language scheduling, conflict detection, travel time insertion via Google Places API, and schedule brief emission to Vesper.
+- **Custodian** — system health monitoring. Error diagnosis, data integrity checks, and self-healing automation.
 
 ### Preference Layer
 
@@ -61,7 +63,8 @@ Skills that improve the system itself.
 
 ### Interface Surfaces
 
-- **Vesper** — daily briefing generator. Aggregates signals from Corvus, Dispatch, Rally, and other skills into morning and evening briefings. Presents outcomes without exposing internal processes.
+- **Vesper** — daily briefing generator. Aggregates signals from Corvus, Dispatch, Rally, Sands, and other skills into morning and evening briefings. Presents outcomes without exposing internal processes.
+- **Haiku** — social media presence management for Bluesky. Content strategy, post generation with human-writing quality gate, follow maintenance, and haiku practice.
 - **Relay** — device gateway. Normalizes inbound device signals and manages permissions. Private skill. Build spec exists in `Todo/Relay/`; not yet active.
 
 ---
