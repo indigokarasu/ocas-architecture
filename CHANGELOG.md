@@ -1,3 +1,27 @@
+## [2026-04-03] OCAS Coherence Sync Complete
+
+### Changes
+- **12 skills updated for spec compliance:**
+  - Added Ontology types sections: ocas-corvus, ocas-fellow, ocas-mentor, ocas-praxis
+  - Removed incorrect Background tasks sections: ocas-look, ocas-scout, ocas-sift, ocas-taste, ocas-voyage, ocas-weave
+  - Normalized section headers: ocas-custodian
+  - Added Commands section: ocas-triage
+- **Versions bumped (patch):** corvus→2.5.1, fellow→2.5.1, mentor→2.5.1, praxis→2.5.1, look→2.3.4, scout→2.7.2, sift→2.6.1, taste→3.3.2, voyage→2.5.1, weave→2.4.1, custodian→1.2.1, triage→1.3.1
+- **Releases created** for all updated skills
+- **Audit status:** 17/20 skills fully compliant (false positives on spot/triage background tasks — per spec these skills have no operational background tasks)
+
+### Verified
+- All SKILL.md files now have required sections per ocas-skill-authoring-rules.md
+- Ontology types properly declared per spec-ocas-ontology.md
+- Background tasks sections accurately reflect per spec requirements
+- Bundled plans verified for scout, sift, rally, taste, voyage
+
+### Architecture Specs
+- spec-ocas-ontology.md: v1.5 — complete skill coverage verified
+- spec-ocas-interfaces.md: v1.5 — polling cadences documented for all background task skills
+- spec-ocas-shared-schemas.md: v1.3 — current
+- ocas-skill-authoring-rules.md: v2.6.0 — current with recent background tasks clarifications
+
 ## [2026-04-02] Automation Compliance Update
 
 ### Changed
