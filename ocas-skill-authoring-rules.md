@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.0
+Version: 2.6.1
 Author: Indigo Karasu
+
+Changes from 2.6.0: added ocas-multipass and ocas-vibes to Responsibility Boundaries list; updated to reflect all 24 active OCAS skills as of 2026-04-04.
 
 Changes from 2.5.0: updated Background Tasks skill lists to reflect current state (added ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch to cron list); clarified universal self-update cron is not counted as operational background task; updated cron CLI syntax to match openclaw cron add specification (--session, --message, --light-context, --tz flags); removed ocas-dispatch from purely reactive list.
 
@@ -288,7 +290,7 @@ System skills must include:
 
 Before creating a new skill, verify it does not conflict with:
 
-ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands
+ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-relay, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
 
 Each skill build spec includes a Responsibility Boundary section.
 
