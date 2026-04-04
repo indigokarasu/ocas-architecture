@@ -1,3 +1,33 @@
+## [2026-04-04] OCAS Architecture Coherence Sync — End-to-End Audit
+
+### Changes
+- **Discovered and verified 24 OCAS skills:** ocas-spot, ocas-multipass, ocas-vesper, ocas-vibes, ocas-sands, ocas-haiku, ocas-taste, ocas-rally, ocas-scout, ocas-sift, ocas-elephas, ocas-custodian, ocas-forge, ocas-mentor, ocas-weave, ocas-triage, ocas-praxis, ocas-fellow, ocas-voyage, ocas-bower, ocas-corvus, ocas-dispatch, ocas-thread, ocas-look
+- **All 24 skills audited and brought into compliance:**
+  - Added missing `self_update` blocks to skill.json (haiku, triage, dispatch)
+  - Added missing `skill_type` and `filesystem` fields (vibes)
+  - Added missing SKILL.md sections across all 23 affected skills:
+    - Support file map (multipass, haiku, triage, bower)
+    - Update command (vesper, sands, taste, rally, scout, sift, elephas, forge, mentor, weave, praxis, fellow, voyage, corvus, dispatch, thread, look)
+    - Commands section (vibes, haiku, custodian, triage)
+    - Initialization section (vibes, haiku, custodian)
+
+### Architecture Specifications Updated
+- **ocas-skill-authoring-rules.md:** v2.6.0 → v2.6.1
+  - Added ocas-multipass and ocas-vibes to Responsibility Boundaries list
+  - Reflects all 24 active OCAS skills
+- **spec-ocas-ontology.md:** v1.5 → v1.5.1
+  - Added ocas-multipass and ocas-vibes to Skill Entity Extraction Ownership table
+  - Added ocas-multipass and ocas-vibes to Signal Emission Responsibilities table
+  - Reflects all 24 active OCAS skills
+
+### Validation Results
+- **Audit status:** 24/24 skills pass structural compliance check
+- All SKILL.md files contain required sections per ocas-skill-authoring-rules.md
+- All skill.json files contain required metadata fields
+- All skills properly declare ontology/entity extraction behavior
+- All skills properly declare storage layout and journal output paths
+- All skills properly declare initialization and update command sections
+
 ## [2026-04-03] OCAS Coherence Sync Complete
 
 ### Changes
