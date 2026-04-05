@@ -1,3 +1,30 @@
+## [2026-04-05] Ontology Types Section Completion
+
+### Changes
+- **Added ## Ontology types sections to 6 system skills:**
+  - ocas-fellow: documented concept/idea and digital artifact observations (no Signal emission)
+  - ocas-mentor: documented event, idea, and artifact observations (no Signal emission)
+  - ocas-multipass: explicit statement of no entity extraction
+  - ocas-spot: renamed "Ontology mapping" to "Ontology types" for spec alignment
+  - ocas-praxis: documented event and idea observations (no Signal emission)
+  - ocas-vibes: explicit statement of no entity extraction
+  
+- **Versions bumped (patch):**
+  - ocas-fellow: 2.5.1 → 2.5.2
+  - ocas-mentor: 2.5.1 → 2.5.2
+  - ocas-multipass: 4.0.1 → 4.0.2
+  - ocas-spot: 2.1.0 → 2.1.1
+  - ocas-praxis: 2.5.1 → 2.5.2
+  - ocas-vibes: 1.0.1 → 1.0.2
+
+- **GitHub releases created** for all 6 updated skills
+
+### Compliance Status
+- **Audit result:** 24/24 OCAS skills now have ## Ontology types sections
+- All skills clearly declare entity extraction behavior
+- All skills properly document Signal emission policy per spec-ocas-ontology.md
+- Standardized section naming across all system skills
+
 ## [2026-04-04] OCAS Architecture Coherence Sync — End-to-End Audit
 
 ### Changes

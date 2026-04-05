@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5.1
+Spec Version: 1.5.2
 Author: Indigo Karasu
+
+Changes from 1.5.1: verified all 24 OCAS skills have complete ontology type definitions and Signal emission declarations; all skills audited for Ontology types section compliance on 2026-04-05.
 
 Changes from 1.5: added ocas-multipass and ocas-vibes to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; updated to reflect all 24 active OCAS skills as of 2026-04-04.
 
