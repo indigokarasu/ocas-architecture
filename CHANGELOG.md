@@ -1,3 +1,26 @@
+## [2026-04-07] Architecture Coherence Audit and Sync
+
+### Changes
+- **Removed ocas-relay from architecture specs:**
+  - Removed from Responsibility Boundaries list in ocas-skill-authoring-rules.md
+  - Removed from Skill Entity Extraction Ownership table in spec-ocas-ontology.md
+  - Removed from Signal Emission Responsibilities table in spec-ocas-ontology.md
+  - Reason: skill does not exist as OCAS architecture component; relay repo has no skill.json
+
+- **Versions bumped (patch):**
+  - spec-ocas-ontology.md: 1.5.2 → 1.5.3
+  - ocas-skill-authoring-rules.md: 2.6.2 → 2.6.3
+
+### Audit Results
+- **All 24 active OCAS skills verified:**
+  - ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-forge, ocas-fellow, ocas-thread, ocas-custodian, ocas-triage, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes
+  - All skills pass skill.json validation, SKILL.md structure check
+  - All skills have proper version numbers and GitHub releases created
+  - Specs now reflect actual skill inventory
+
+- **GitHub releases created for all 24 skills**
+- **No breaking changes; specs remain compatible with existing skill implementations**
+
 ## [2026-04-05] Ontology Types Section Completion
 
 ### Changes
