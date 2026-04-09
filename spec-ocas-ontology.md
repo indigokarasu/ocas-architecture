@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 1.5.3
+Spec Version: 1.5.4
 Author: Indigo Karasu
+
+Changes from 1.5.3: removed duplicate ocas-fellow entry from Signal Emission Responsibilities table; all 24 OCAS skills verified and listed without duplicates.
 
 Changes from 1.5.2: removed ocas-relay from Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; skill does not exist as OCAS architecture component; verified 24/24 actual OCAS skills listed and current.
 
@@ -357,7 +359,6 @@ Skills that extract entities must emit Signals to Elephas for Chronicle ingestio
 | ocas-fellow | No | Experimentation engine; no entity signals |
 | ocas-multipass | No | Tool delegation; no entity signals |
 | ocas-vibes | No | Voice/style enforcement; no entity signals |
-| ocas-fellow | No | Experimentation engine; no entity signals |
 
 ---
 
