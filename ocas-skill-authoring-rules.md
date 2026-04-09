@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.6.3
+Version: 2.6.4
 Author: Indigo Karasu
+
+Changes from 2.6.3: added explicit Background tasks sections to ocas-multipass, ocas-triage, and ocas-vibes documenting that they have no operational background tasks; created skill.json files for all 24 OCAS skills; architecture coherence audit 2026-04-09.
 
 Changes from 2.6.2: removed ocas-relay from Responsibility Boundaries list (skill does not exist as OCAS architecture component); confirmed all 24 active OCAS skills in boundaries list; architecture coherence audit 2026-04-07.
 
