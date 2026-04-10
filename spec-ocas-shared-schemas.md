@@ -1,6 +1,6 @@
 # OCAS Shared Schemas
 
-Spec Version: 1.3
+Spec Version: 1.1.4
 Author: Indigo Karasu
 
 Changes from 1.2: added PortfolioOutcomeRecord schema (Rally domain extension); added ConsumptionSignal and ItemRecord schemas (Taste domain extensions); added EvaluationResult schema (Mentor domain extension).

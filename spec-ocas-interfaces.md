@@ -1,6 +1,6 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.5
+Spec Version: 1.3.4
 Author: Indigo Karasu
 
 Changes from 1.3: added Sands → Vesper Schedule Brief Intake interface; added Sands to polling cadence table.
