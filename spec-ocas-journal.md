@@ -1,6 +1,6 @@
 # OCAS Journals & Evaluation Specification
 
-Spec Version: 1.3
+Spec Version: 1.2.3
 Versioning Policy: Minor version increments only. Major versions avoided to maintain compatibility.
 
 Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Elephas and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.

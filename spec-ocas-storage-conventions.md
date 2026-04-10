@@ -1,6 +1,6 @@
 # OCAS Storage Conventions
 
-Spec Version: 1.1
+Spec Version: 1.0.3
 Author: Indigo Karasu
 
 Changes from 1.0: replaced workspace dot-folder convention with centralized storage under ~/openclaw/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.

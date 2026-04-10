@@ -1,6 +1,6 @@
 # OCAS Workflow Plans
 
-Spec Version: 1.1
+Spec Version: 1.1.3
 Author: Indigo Karasu
 
 Changes from 1.0: added Expected Bundled Plans section; added plan init registration pattern; added notes on graceful skill-absent handling in plan runs.
