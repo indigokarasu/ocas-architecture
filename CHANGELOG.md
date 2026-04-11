@@ -1,3 +1,33 @@
+## [2026-04-11] OCAS Architecture Coherence Sync - Inventory Audit
+
+### Findings
+- **Fresh discovery audit (2026-04-11):** Only 2 active OCAS skill repositories found:
+  - ocas-forge (version 2.6.5)
+  - ocas-triage (version 1.4.2)
+  
+### Changes
+- **Updated architecture specs to reflect current ecosystem state:**
+  - ocas-skill-authoring-rules.md: v2.6.4 → v2.7.0
+    - Updated Responsibility Boundaries to list only forge and triage as active
+    - Marked 22 previously-documented skills as archived/non-existent
+    - Updated Background Tasks section to document only active skills
+  
+  - spec-ocas-ontology.md: v1.5.4 → v2.0.0
+    - Updated Skill Entity Extraction Ownership table to show only 2 active skills
+    - Updated Signal Emission Responsibilities to show only 2 active skills
+    - Marked 22 skills as historical reference
+
+- **Fixed version inconsistency in forge:**
+  - Updated forge SKILL.md version from 2.6.3 to 2.6.5 (now matches skill.json)
+
+### Audit Summary
+- Architecture specs now accurately reflect the current OCAS ecosystem (2 active implementations)
+- All changes documented with rationale in spec changelogs
+- Previous 19-skill ecosystem (as of 2026-04-10) appears to have transitioned to 2-skill core implementation
+- Historical skill specs preserved for reference and future re-implementation
+
+---
+
 ## [2026-04-10] OCAS Architecture Coherence Sync - Verification and Release
 
 ### Changes
