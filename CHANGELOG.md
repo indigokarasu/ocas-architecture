@@ -1,9 +1,26 @@
-## [2026-04-11] OCAS Architecture Coherence Sync - Inventory Audit
+## [2026-04-12] OCAS Architecture Coherence Sync - Repository Audit
 
 ### Findings
-- **Fresh discovery audit (2026-04-11):** Only 2 active OCAS skill repositories found:
+- **Fresh discovery audit (2026-04-12):** Discovered 1 active OCAS skill repository with instantiated package:
+  - ocas-forge (version 2.6.6, fully compliant with authoring rules)
+- **Repository status:** ocas-triage listed in previous audit as active does not have a GitHub repository; moved to archived/non-existent
+- **Audit result:** All discovered OCAS skills pass structural and content checks against ocas-skill-authoring-rules.md
+
+### Changes
+- **Updated ocas-skill-authoring-rules.md: v2.7.0 → v2.7.1**
+  - Responsibility Boundaries updated: removed ocas-triage from active list, moved to legacy
+  - Background Tasks section clarified to reflect only ocas-forge has operational heartbeat tasks
+  - Updated ecosystem date reference from 2026-04-11 to 2026-04-12
+  
+- **CHANGELOG.md updated to reflect audit findings**
+  - Added 2026-04-12 audit entry with repository discovery results
+  
+## [2026-04-11] OCAS Architecture Coherence Sync - Inventory Audit
+
+### Findings (Superseded)
+- **Previous audit (2026-04-11):** Reported 2 active OCAS skill repositories:
   - ocas-forge (version 2.6.5)
-  - ocas-triage (version 1.4.2)
+  - ocas-triage (version 1.4.2) — **Note: Repository does not exist; only design specs retained**
   
 ### Changes
 - **Updated architecture specs to reflect current ecosystem state:**
