@@ -1,3 +1,13 @@
+## [2026-04-13] Authoring Rules Clarification
+
+### Changes
+- **Updated ocas-skill-authoring-rules.md: v2.7.1 → v2.7.2**
+  - Added explicit requirement that every skill package must include `README.md` and `CHANGELOG.md`
+  - Referenced `spec-ocas-skill-publishing.md` as single source of truth for package structure
+  - Ensures consistency between build template and authoring rules
+
+---
+
 ## [2026-04-12] Added skill publishing spec
 
 ### Added
