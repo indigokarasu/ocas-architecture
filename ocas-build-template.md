@@ -52,9 +52,14 @@ Minimum structure unless the specification below requires more:
 
 ```
 ocas-{skill}/
-  skill.json
   SKILL.md
+  README.md
+  CHANGELOG.md
 ```
+
+`skill.json` is the legacy format and should not be created for new packages. SKILL.md frontmatter (YAML) is the current standard.
+
+`README.md` and `CHANGELOG.md` are required for every package. Follow the structure defined in `spec-ocas-skill-publishing.md`.
 
 Add only justified support directories:
 

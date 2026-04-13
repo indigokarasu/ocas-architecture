@@ -1,3 +1,11 @@
+## [2026-04-12] Added skill publishing spec
+
+### Added
+- `spec-ocas-skill-publishing.md` — defines README.md structure, CHANGELOG.md format, versioning rules, and GitHub release convention for all OCAS skill packages
+- Updated `ocas-build-template.md`: README.md and CHANGELOG.md are now required package outputs; `skill.json` noted as legacy format
+
+---
+
 ## [2026-04-12] OCAS Architecture Coherence Sync - Repository Audit
 
 ### Findings
