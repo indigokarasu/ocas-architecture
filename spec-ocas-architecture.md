@@ -153,12 +153,12 @@ Dots must not be used because some runtimes interpret them as hierarchy separato
 
 ## Storage Convention
 
-All persistent data is stored centrally under `{agent_root}/`, not inside skill packages or workspace dot-folders.
+All persistent data is stored centrally under `{agent_root}/commons/`, not inside skill packages or workspace dot-folders.
 
 See `spec-ocas-storage-conventions.md` for the full standard.
 
 ```
-{agent_root}/
+{agent_root}/commons/
   data/{skill-name}/     — skill state, config, JSONL logs
   journals/{skill-name}/ — journal files
   db/{skill-name}/       — LadybugDB databases (Elephas, Weave only)
@@ -250,8 +250,8 @@ See `spec-ocas-workflow-plans.md` for:
 ## Invariants
 
 - Only Elephas writes to Chronicle.
-- Only Weave writes to `{agent_root}/db/ocas-weave/`.
-- Only Elephas writes to `{agent_root}/db/ocas-elephas/`.
+- Only Weave writes to `{agent_root}/commons/db/ocas-weave/`.
+- Only Elephas writes to `{agent_root}/commons/db/ocas-elephas/`.
 - No skill reads or writes another skill's data directory.
 - Challenger variants never execute side effects.
 - Journals are append-only and immutable after write.
