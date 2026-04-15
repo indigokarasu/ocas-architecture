@@ -3,7 +3,7 @@
 Version: 2.2.0
 Author: Indigo Karasu
 
-Changes from 2.1.0: updated storage requirements to central ~/openclaw/ layout; added journal path requirement; added interfaces section; added spec file reference table; clarified visibility and journal type requirements.
+Changes from 2.1.0: updated storage requirements to central {agent_root}/commons/ layout; added journal path requirement; added interfaces section; added spec file reference table; clarified visibility and journal type requirements.
 
 ---
 
@@ -122,14 +122,14 @@ Sections: title, trigger conditions, purpose and boundaries, decision model, exe
 Every skill with persistent state uses these paths. No data inside the skill package.
 
 ```
-~/openclaw/data/{skill-name}/config.json    — skill configuration
-~/openclaw/data/{skill-name}/*.jsonl        — append-only logs
-~/openclaw/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
+{agent_root}/commons/data/{skill-name}/config.json    — skill configuration
+{agent_root}/commons/data/{skill-name}/*.jsonl        — append-only logs
+{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
 ```
 
 For LadybugDB skills only:
 ```
-~/openclaw/db/{skill-name}/{skill-name}.lbug
+{agent_root}/commons/db/{skill-name}/{skill-name}.lbug
 ```
 
 Config must include ConfigBase fields. See `spec-ocas-shared-schemas.md`.
@@ -137,11 +137,11 @@ Config must include ConfigBase fields. See `spec-ocas-shared-schemas.md`.
 ### Storage Layout Section (required in system skill SKILL.md)
 
 ```
-~/openclaw/data/ocas-{skill}/
+{agent_root}/commons/data/ocas-{skill}/
   config.json
   {primary_log}.jsonl
   decisions.jsonl
-~/openclaw/journals/ocas-{skill}/
+{agent_root}/commons/journals/ocas-{skill}/
   YYYY-MM-DD/{run_id}.json
 ```
 
@@ -158,7 +158,7 @@ Declare which journal type(s) this skill emits:
 
 Skills may emit multiple types depending on the command being run.
 
-Journal path: `~/openclaw/journals/ocas-{skill}/YYYY-MM-DD/{run_id}.json`
+Journal path: `{agent_root}/commons/journals/ocas-{skill}/YYYY-MM-DD/{run_id}.json`
 
 See `spec-ocas-journal.md` for the full journal specification.
 
@@ -195,7 +195,7 @@ Every system skill SKILL.md must include:
 
 **Journal Outputs** — which journal type(s) this skill emits and under what conditions.
 
-**Storage Layout** — data and journal paths under `~/openclaw/`.
+**Storage Layout** — data and journal paths under `{agent_root}/commons/`.
 
 **Visibility** — `public` or `private`.
 
@@ -203,7 +203,7 @@ Every system skill SKILL.md must include:
 
 ## Specificity Map
 
-Be exact about: naming, file paths (use `~/openclaw/` root), metadata fields, command syntax, schemas, validation checks, routing language, journal types.
+Be exact about: naming, file paths (use `{agent_root}/commons/` root), metadata fields, command syntax, schemas, validation checks, routing language, journal types.
 
 Allow flexibility in: prose descriptions, section ordering within guidelines, minor wording variation.
 
@@ -222,7 +222,7 @@ Confirm:
 - Filenames are consistent
 - Support directories exist only when justified
 - SKILL.md points to any support file it depends on
-- Storage paths use `~/openclaw/` root
+- Storage paths use `{agent_root}/commons/` root
 - Journal path is declared
 - Major duplication across files has been avoided
 
@@ -290,9 +290,9 @@ Complete this block before giving the document to the coder LLM.
 - `assets/`:
 
 ### Storage Layout
-- Data path: `~/openclaw/data/ocas-{skill}/`
-- Journal path: `~/openclaw/journals/ocas-{skill}/`
-- DB path (if applicable): `~/openclaw/db/ocas-{skill}/`
+- Data path: `{agent_root}/commons/data/ocas-{skill}/`
+- Journal path: `{agent_root}/commons/journals/ocas-{skill}/`
+- DB path (if applicable): `{agent_root}/commons/db/ocas-{skill}/`
 
 ### Journal Output
 - Journal type(s):
