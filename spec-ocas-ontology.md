@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 2.0.1
+Spec Version: 2.1.0
 Author: Indigo Karasu
+
+Changes from 2.0.1: architecture coherence audit 2026-04-16 found 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to include ocas-relay (extracts Thing/DigitalArtifact from device attachments); minor version bump due to expansion of active skill count.
 
 Changes from 2.0.0: architecture coherence audit 2026-04-12 found only 1 active OCAS skill repository (ocas-forge); ocas-triage has no GitHub repository instantiation; updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to reflect only ocas-forge as active; moved ocas-triage to historical reference section; patch version bump due to scope refinement within existing active skills count.
 
@@ -298,11 +300,12 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
 
-**Currently active OCAS skills (as of 2026-04-12):**
+**Currently active OCAS skills (as of 2026-04-16):**
 
 | Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
 |---|---|---|---|---|---|
 | ocas-forge | — | — | — | — | Skill architect; does not extract entities or emit Signals |
+| ocas-relay | — | — | — | DigitalArtifact | Extracts device attachments; does not emit Signals |
 
 **Historical skill mappings (reference; skills not currently released):**
 
@@ -319,11 +322,12 @@ Skills not in this list do not extract entities and do not emit Signals to Eleph
 
 Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
 
-**Currently active OCAS skills (as of 2026-04-12):**
+**Currently active OCAS skills (as of 2026-04-16):**
 
 | Skill | Emit Signals to Elephas? | Condition |
 |---|---|---|
 | ocas-forge | No | Skill architect; no entity signals |
+| ocas-relay | No | Device gateway; signal interpretation handled by downstream skills |
 
 **Historical skill patterns (reference; skills not currently released):**
 

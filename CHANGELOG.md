@@ -1,3 +1,39 @@
+## [2026-04-16] OCAS Architecture Coherence Sync - Relay Discovery and Spec Updates
+
+### Findings
+- **Fresh discovery audit (2026-04-16):** Discovered 2 active OCAS skill repositories with instantiated packages:
+  - ocas-forge (version 2.6.10, requires reference sync with updated specs)
+  - ocas-relay (version 1.0.1, required compliance fixes and expansion to 1.1.0)
+- **Audit result:** ocas-relay was missing filesystem and self_update fields in skill.json, and missing required SKILL.md sections per authoring rules
+
+### Changes
+- **Updated ocas-skill-authoring-rules.md: v2.7.2 → v2.8.0**
+  - Responsibility Boundaries expanded: added ocas-relay (device gateway, telemetry, permissions)
+  - Background Tasks section updated to reflect both active skills (ocas-forge, ocas-relay)
+  - Ecosystem date reference updated from 2026-04-12 to 2026-04-16
+
+- **Updated spec-ocas-ontology.md: v2.0.1 → v2.1.0**
+  - Skill Entity Extraction Ownership table: added ocas-relay (extracts Thing/DigitalArtifact)
+  - Signal Emission Responsibilities table: added ocas-relay (does not emit Signals)
+  - Ecosystem date reference updated to 2026-04-16
+
+- **Updated relay/skill.json: v1.0.1 → v1.1.0**
+  - Added `filesystem.read` and `filesystem.write` fields (were missing)
+  - Added `self_update` block with GitHub source and update command
+
+- **Updated relay/SKILL.md**
+  - Added complete metadata frontmatter (author, version, openclaw config)
+  - Added "Optional skill cooperation" section (Dispatch, Sift, Thread)
+  - Added "Journal outputs" section (Action Journal)
+  - Added "OKRs" section with permission and fallback metrics
+  - Added "Initialization" section with standard startup procedures
+  - Added "Background tasks" section documenting relay:update cron job
+  - Added "Self-update" section with update mechanism description
+  - Fixed Storage layout paths to use `{agent_root}/commons/` convention
+  - Added "Update command" section documenting relay.update
+
+---
+
 ## [2026-04-13] Authoring Rules Clarification
 
 ### Changes
