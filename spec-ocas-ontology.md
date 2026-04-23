@@ -1,7 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 2.1.0
+Spec Version: 2.2.0
 Author: Indigo Karasu
+
+Changes from 2.1.0: architecture coherence audit 2026-04-23 found 3 active OCAS skill repositories (ocas-forge, ocas-relay, ocas-rally); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to include ocas-rally (extracts Thing securities + Concept/Event market events, emits both to Elephas); minor version bump due to expansion of active skill count.
 
 Changes from 2.0.1: architecture coherence audit 2026-04-16 found 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to include ocas-relay (extracts Thing/DigitalArtifact from device attachments); minor version bump due to expansion of active skill count.
 
@@ -300,16 +302,17 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
 
-**Currently active OCAS skills (as of 2026-04-16):**
+**Currently active OCAS skills (as of 2026-04-23):**
 
 | Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
 |---|---|---|---|---|---|
 | ocas-forge | — | — | — | — | Skill architect; does not extract entities or emit Signals |
 | ocas-relay | — | — | — | DigitalArtifact | Extracts device attachments; does not emit Signals |
+| ocas-rally | — | — | Event | Thing | Extracts securities (Thing) from the investable universe and material market events (Concept/Event: earnings, M&A, guidance revisions, analyst rating changes, 8-K filings, dividend events). Emits both to Elephas intake; toggle via `config.research_memory.emit_to_elephas` (default true). Maintains per-ticker research dossiers at `{agent_root}/commons/data/ocas-rally/research_dossiers/{TICKER}.md` as local working memory. |
 
 **Historical skill mappings (reference; skills not currently released):**
 
-Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -322,16 +325,17 @@ Skills not in this list do not extract entities and do not emit Signals to Eleph
 
 Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
 
-**Currently active OCAS skills (as of 2026-04-16):**
+**Currently active OCAS skills (as of 2026-04-23):**
 
 | Skill | Emit Signals to Elephas? | Condition |
 |---|---|---|
 | ocas-forge | No | Skill architect; no entity signals |
 | ocas-relay | No | Device gateway; signal interpretation handled by downstream skills |
+| ocas-rally | Yes | On every `rally.research` run: Thing signals for investable-universe securities (when composite delta >= 0.05 or on a weekly per-ticker cadence) and Concept/Event signals for material events (earnings, M&A, guidance revisions, analyst rating changes, 8-K material content, dividend changes). Does not emit intraday ticks, holdings, pending-action state, or scored rumors. Controlled by `config.research_memory.emit_to_elephas` (default true). |
 
 **Historical skill patterns (reference; skills not currently released):**
 
-Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-rally, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
 
 ---
 

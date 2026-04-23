@@ -1,8 +1,9 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.3.4
+Spec Version: 1.4.0
 Author: Indigo Karasu
 
+Changes from 1.3.4: added Rally ↔ Sift Sentiment Enrichment and News Pulse cooperative query row (four sentiment workflows: social_heat, rumor_score, short_interest, news_pulse via Sift -> SearchX -> SearXNG chain with x.com / Reddit / LinkedIn / news engines / SEC EDGAR); added Rally emission scope subsection under Elephas Signal Intake documenting Thing and Concept/Event signal types Rally writes to Chronicle intake. Reflects Rally v3.5.4 research memory and sentiment default-on.
 Changes from 1.3: added Sands → Vesper Schedule Brief Intake interface; added Sands to polling cadence table.
 Changes from 1.2: added Rally → Vesper Portfolio Outcome cooperative read interface; added Vesper → Dispatch Briefing Delivery session-scoped interface; added Cooperative Query Interfaces section documenting five informal read-only cross-skill queries (Sift↔Thread, Sift↔Weave, Scout↔Weave, Taste↔Sift, Voyage↔Sift); added Rally and Vesper to polling cadence table.
 
@@ -39,7 +40,16 @@ Skills emit Signal observations to Elephas for Chronicle ingestion.
 ```
 
 ### Producers
-Any skill that observes entities, relationships, or events worth promoting to Chronicle: Sift, Scout, Look, Thread, Corvus, Weave (optional), Triage (optional).
+Any skill that observes entities, relationships, or events worth promoting to Chronicle: Sift, Scout, Look, Thread, Corvus, Rally (Thing + Concept/Event), Weave (optional), Triage (optional).
+
+### Rally emission scope
+
+Rally emits Thing signals and Concept/Event signals after every `rally.research` run when `config.research_memory.emit_to_elephas` is `true` (default, as of Rally v3.5.4).
+
+- **Thing signals**: securities in the investable universe, emitted when the Rally composite score changes materially (delta >= 0.05 since last emission) or on a weekly cadence per ticker (whichever is sooner). Payload fields: `symbol`, `name`, `sector`, `industry`, `market_cap_bn`, `rally_composite`, `rally_percentile_rank`, `is_current_holding`, plus standard `identifiers` block with `ticker` and `rally:ticker` types.
+- **Concept/Event signals**: material market events only (earnings release with confirmed date, M&A announcement, guidance revision, analyst rating change with price target update, 8-K filing with material content, dividend declaration or change). Payload fields: `event_type`, `subject_symbol`, `event_date`, `description`, `source`.
+
+Rally does NOT emit: intraday price ticks, internal pending-action state, portfolio holdings list (Vesper reads the daily report instead), or unconfirmed rumors (those live in Rally's local dossiers only).
 
 ### Format
 Signal schema from `spec-ocas-shared-schemas.md`. The `.signal.json` extension distinguishes signal files from other intake files.
@@ -48,7 +58,7 @@ Signal schema from `spec-ocas-shared-schemas.md`. The `.signal.json` extension d
 Elephas scans this directory during every `elephas.ingest.journals` run. Processed files move to `intake/processed/`.
 
 ### Notes
-Signal emission is optional for standalone skills (Weave, Triage). Chronicle is a downstream consumer, not an upstream dependency.
+Signal emission is optional for standalone skills (Weave, Triage). Chronicle is a downstream consumer, not an upstream dependency. Rally's emission is also toggleable via `config.research_memory.emit_to_elephas: false` for deployments without Elephas.
 
 ---
 
@@ -419,6 +429,27 @@ Taste may invoke Sift to enrich an extracted item (e.g., a restaurant, product, 
 
 Voyage may invoke Sift to enrich venue details, check transport options, or validate hours and pricing. Direct skill invocation in-session. If Sift is absent, Voyage proceeds with available data.
 
+### Rally ↔ Sift: Sentiment Enrichment and News Pulse
+
+Rally invokes Sift in-session during `rally.research` for four sentiment workflows when `config.sentiment.enabled: true` (default, as of Rally v3.5.4):
+
+1. `social_heat` - social-media mention velocity for a ticker/company name over the last 48 hours vs. 30-day baseline
+2. `rumor_score` - M&A / guidance / analyst-action keyword density plus SEC EDGAR insider-buy clusters
+3. `short_interest` - latest short-interest-as-pct-of-float (direct Yahoo Finance fetch; no Sift dependency)
+4. `news_pulse` - recent major-outlet headlines for dossier enrichment and rationale generation
+
+Sift routes these through its SearchX integration, which invokes a locally-hosted SearXNG instance aggregating x.com (via nitter), Reddit, LinkedIn, general news engines (Reuters, Bloomberg, WSJ, FT, CNBC, Benzinga), and filings-adjacent aggregators. If Sift has direct platform connectors enabled (Reddit API, x.com via agent-reach, LinkedIn), those augment the SearXNG results. SEC EDGAR queries go through Sift's filings path rather than SearXNG.
+
+This is a direct in-session skill invocation, not a file read. Rally caches results in `{agent_root}/commons/data/ocas-rally/sentiment_cache.jsonl` and `news_cache.jsonl` (30-day rolling) so repeat queries in the same research window do not re-invoke Sift.
+
+Fallback hierarchy:
+- Sift invocation succeeds: use results directly
+- Sift present but SearchX/SearXNG unreachable: Sift returns an error; Rally uses cached values if within `max_data_age_hours` (default 72)
+- Sift absent entirely: Rally skips sentiment and news_pulse, redistributes the 5% sentiment category weight to Momentum, and logs `"sift_unavailable_sentiment_skipped"` in `decisions.jsonl`
+- Rally never halts research because sentiment enrichment is unavailable
+
+See `ocas-rally/references/research-and-scoring.md` Sentiment Enrichment section for the full scoring procedure.
+
 ---
 
 ## Polling and Timing
@@ -429,7 +460,7 @@ Recommended polling cadences:
 
 | Consumer | Intake | Recommended Cadence |
 |---|---|---|
-| Elephas | Signal intake | Every `elephas.ingest.journals` run (e.g., every 15 min) |
+| Elephas | Signal intake (including Rally Thing + Concept/Event) | Every `elephas.ingest.journals` run (e.g., every 15 min) |
 | Mentor | Journals directory + Fellow CycleResults | Every `mentor.heartbeat.light` (e.g., every 15 min) |
 | Praxis | Behavioral signals from Corvus | Every Praxis scheduled pass or on-demand |
 | Forge | Variant proposals and decisions from Mentor | Every Forge cycle or on-demand |

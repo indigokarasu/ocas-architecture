@@ -1,3 +1,30 @@
+## [2026-04-23] Rally discovery and spec integration
+
+### Findings
+- Discovery audit 2026-04-23: `indigokarasu/rally` v3.5.4 now exists as a third active OCAS skill repository alongside `indigokarasu/Forge` and `indigokarasu/Relay`.
+- Rally v3.5.4 uses the OCAS convention as established by Forge: `metadata.hermes` + `metadata.openclaw` extension blocks, `{agent_root}/commons/data/ocas-rally/` and `{agent_root}/commons/journals/ocas-rally/` paths, `gh`-CLI-based self_update procedure.
+- Rally v3.5.4 adds two capabilities that require ontology and interface documentation:
+  1. Research memory via per-ticker dossiers at `{agent_root}/commons/data/ocas-rally/research_dossiers/{TICKER}.md`
+  2. Chronicle emission: Thing signals (securities) and Concept/Event signals (material market events: earnings, M&A, guidance revisions, analyst rating changes with PT updates, 8-K material content, dividend changes)
+
+### Changes
+
+- **Updated spec-ocas-ontology.md: v2.1.0 -> v2.2.0**
+  - Skill Entity Extraction Ownership table: added `ocas-rally` to currently-active list (Thing securities + Concept/Event market events), removed from historical reference
+  - Signal Emission Responsibilities table: added `ocas-rally` with Yes emission and condition documenting the delta-based and weekly-cadence emission rules, what is and is not emitted, and the `config.research_memory.emit_to_elephas` toggle
+  - Header changelog line records the 2026-04-23 coherence audit finding 3 active skill repositories
+
+- **Updated spec-ocas-interfaces.md: v1.3.4 -> v1.4.0**
+  - Elephas Signal Intake: added `ocas-rally` to Producers line (Thing + Concept/Event) and added a dedicated "Rally emission scope" subsection documenting what Rally emits, the delta / weekly cadence, and what Rally does not emit
+  - Cooperative Query Interfaces: added "Rally <-> Sift: Sentiment Enrichment and News Pulse" row covering the four sentiment workflows (social_heat, rumor_score, short_interest, news_pulse) routed through Sift -> SearchX -> SearXNG with x.com / Reddit / LinkedIn / major news outlets / SEC EDGAR, caching behavior in `sentiment_cache.jsonl` / `news_cache.jsonl`, and the full fallback hierarchy
+  - Polling cadence table updated: Elephas row now notes Rally Thing + Concept/Event among the emitters
+
+- **Updated README.md**
+  - Version table resynced to actual file versions (architecture 1.3, interfaces 1.4.0, journal 1.2.3, ontology 2.2.0, shared-schemas 1.1.4, storage-conventions 1.0.3, workflow-plans 1.1.3, skill-publishing 1.0)
+  - Added "Active skill repositories" table listing the three current active skills with their repo names and versions
+  - Added explicit list of historical-reference skills for clarity
+
+
 ## [2026-04-16] OCAS Architecture Coherence Sync - Relay Discovery and Spec Updates
 
 ### Findings
