@@ -14,6 +14,7 @@ Private repository containing the system architecture specifications, shared sch
 | `spec-ocas-storage-conventions.md` | Storage roots, naming conventions, retention rules | 1.0.3 |
 | `spec-ocas-workflow-plans.md` | Workflow plan format, parameter system, expected bundled plans | 1.1.3 |
 | `spec-ocas-skill-publishing.md` | README, CHANGELOG, and release structure standard | 1.0 |
+| `spec-ocas-scripts.md` | `scripts/` directory best practices: CLI shape, auth, paths, boundary discipline | 1.0.0 |
 
 ## Build Documentation
 
