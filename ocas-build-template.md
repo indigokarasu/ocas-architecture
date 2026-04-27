@@ -248,6 +248,8 @@ All OCAS skills are built against these specifications:
 | `spec-ocas-shared-schemas.md` | Canonical cross-skill data objects |
 | `spec-ocas-interfaces.md` | Inter-skill communication paths and formats |
 | `ocas-skill-authoring-rules.md` | Design principles, validation standard |
+| `spec-ocas-skill-publishing.md` | README, CHANGELOG, release structure |
+| `spec-ocas-scripts.md` | `scripts/` directory best practices, audit checklist |
 
 ---
 
