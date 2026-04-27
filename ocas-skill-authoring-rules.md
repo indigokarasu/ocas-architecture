@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.8.0
+Version: 2.9.0
 Author: Indigo Karasu
+
+Changes from 2.8.0: cross-reference new `spec-ocas-scripts.md` from the `scripts/` section. Minor bump because the rule expanded with new authoritative guidance, not just text.
 
 Changes from 2.7.2: architecture coherence audit 2026-04-16 discovered 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Responsibility Boundaries list to add ocas-relay; updated Background Tasks section to reflect both active skills; minor version bump due to expansion of active skill count.
 
@@ -276,9 +278,11 @@ Use only when material is useful but too secondary or detailed for SKILL.md: lon
 Rule: if a reference file exists, SKILL.md must state when and why to read it.
 
 ### scripts/
-Use only when deterministic help materially improves reliability: validation, scaffolding, transformation, linting.
+Use only when deterministic help materially improves reliability: validation, scaffolding, transformation, linting, or external API connectors.
 
 Rule: do not add scripts for ornament or theoretical completeness.
+
+For CLI shape, auth handling, path discipline, error envelopes, idempotency, and boundary rules (scripts must not duplicate other skills' responsibilities), follow `spec-ocas-scripts.md`. Every reviewable change to `scripts/` should pass the audit checklist at the end of that spec.
 
 ### assets/
 Use only when the skill ships reusable operational artifacts: starter files, canonical examples, templates.
