@@ -1,3 +1,11 @@
+## [2026-05-19] Added Claude API authentication spec
+
+### Added
+- **`spec-ocas-auth-claude.md` v1.0.0** — Claude API authentication patterns for OCAS skills and scripts: `ANTHROPIC_API_KEY` env var convention, model selection via config/env with module-level default constant, `claude auth login` runtime OAuth flow for Claude Code on the Web sessions, journal `model`/`provider` field requirement, security checklist, and anti-patterns.
+- **Updated README.md** — added `spec-ocas-auth-claude.md` to the Specifications table.
+
+---
+
 ## [2026-05-19] Added GitHub authentication spec
 
 ### Added

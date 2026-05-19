@@ -16,6 +16,7 @@ Private repository containing the system architecture specifications, shared sch
 | `spec-ocas-skill-publishing.md` | README, CHANGELOG, and release structure standard | 1.0 |
 | `spec-ocas-scripts.md` | `scripts/` directory best practices: CLI shape, auth, paths, boundary discipline | 1.0.0 |
 | `spec-ocas-auth-github.md` | GitHub authentication patterns: env vars, token storage, `gh` CLI, Claude Code OAuth | 1.0.0 |
+| `spec-ocas-auth-claude.md` | Claude API authentication patterns: API key, model selection, `claude auth login` runtime flow | 1.0.0 |
 
 ## Build Documentation
 
