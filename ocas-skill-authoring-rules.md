@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.10.1
+Version: 2.10.2
 Author: Indigo Karasu
+
+Changes from 2.10.1: coherence audit 2026-05-19 discovered 3 additional active private skill repositories; added ocas-odds, ocas-inception, and ocas-haiku to Responsibility Boundaries list; removed ocas-haiku from "no active repository" list; removed ocas-relay from active list (no SKILL.md).
 
 Changes from 2.10.0: moved ocas-scout to the cron job list (scout:sources-refresh, weekly Sunday 6am, introduced in scout v3.0.0); removed ocas-scout from no-known-background-tasks list.
 
@@ -338,8 +340,11 @@ Before creating a new skill, verify it does not conflict with the following acti
 - ocas-google-workspace — Google Workspace integration
 - ocas-finch — session self-improvement orchestrator
 - ocas-lucid — nightly journal curator. Batch-processes OCAS skill journals into MemPalace's verbatim store via MCP tools. Runs as a scheduled cron job at 3am.
+- ocas-odds — prediction market research, probability assessment, and edge detection across Polymarket, Kalshi, Predictit. Private skill.
+- ocas-inception — full environment simulation engine. Docker-based isolated testing of the full indigo stack. Private skill.
+- ocas-haiku — Bluesky social media presence management. Private skill.
 
-No active repository (historical reference only): ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
+No active repository (historical reference only): ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
 
 Each skill build spec includes a Responsibility Boundary section.
 
