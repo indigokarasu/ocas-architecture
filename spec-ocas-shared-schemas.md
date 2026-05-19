@@ -1,7 +1,9 @@
 # OCAS Shared Schemas
 
-Spec Version: 1.1.4
+Spec Version: 1.2.0
 Author: Indigo Karasu
+
+Changes from 1.1.4: added MCPDiscoveryRecord schema (Scout domain extension, introduced in scout v3.0.0); added PersonToolRecord schema (Scout domain extension, introduced in scout v3.0.0).
 
 Changes from 1.2: added PortfolioOutcomeRecord schema (Rally domain extension); added ConsumptionSignal and ItemRecord schemas (Taste domain extensions); added EvaluationResult schema (Mentor domain extension).
 
@@ -438,6 +440,55 @@ This schema is Taste-internal. It is not emitted to Elephas. It represents a sin
   "regression_flags": ["string — OKRs below threshold"],
   "recommendation": "string — continue|investigate|propose_variant",
   "notes": "string | null"
+}
+```
+
+---
+
+### MCPDiscoveryRecord
+
+**Extends:** DecisionRecord (decision field)
+**Used by:** Scout (writes internally)
+**Written to:** `{agent_root}/commons/data/ocas-scout/mcp_discovery_cache.json`
+
+Tracks each runtime MCP server discovery attempt during a `scout.sources.discover` or `scout.research` run. Used by Scout to avoid re-probing known-good or known-bad servers within the cache TTL (24h for query results, 7-day for list hashes, 30-day for server metadata).
+
+```json
+{
+  "discovery_id": "string — unique identifier",
+  "timestamp": "string — ISO 8601",
+  "registry": "string — source registry (e.g., nothumansearch.ai, github:soxoj/awesome-osint-mcp-servers)",
+  "query": "string — the discovery query used",
+  "servers_found": "number — count of candidate servers returned",
+  "servers_connected": "number — count successfully probed and connected",
+  "servers_used": ["string — server identifiers actually invoked in this run"],
+  "auth_type": "string — none|api_key|oauth",
+  "relevance_score": "number — 0.0 to 1.0, assessed relevance to research query",
+  "cache_hit": "boolean — true if result served from cache",
+  "layer": "string — list_scan|runtime_query"
+}
+```
+
+---
+
+### PersonToolRecord
+
+**Used by:** Scout (writes internally)
+**Written to:** `{agent_root}/commons/data/ocas-scout/person_tools.jsonl`
+
+Tracks each individual person-specific OSINT tool invocation during a research run. Used by Scout for OKR evaluation (`person_tool_coverage`) and to avoid duplicate invocations within a session.
+
+```json
+{
+  "record_id": "string — unique identifier",
+  "run_id": "string — references the parent JournalEntry run_id",
+  "timestamp": "string — ISO 8601",
+  "tool_name": "string — e.g., sherlock, maigret, h8mail, theharvester",
+  "input_type": "string — username|email|phone|full_name|domain",
+  "input_value": "string — the value passed to the tool (hashed if PII-sensitive)",
+  "status": "string — success|error|skipped|not_applicable",
+  "findings_count": "number — number of results returned",
+  "error": "string | null — error message if status is error"
 }
 ```
 
