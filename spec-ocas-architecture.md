@@ -1,7 +1,9 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.4
+Spec Version: 1.4.1
 Author: Indigo Karasu
+
+Changes from 1.4: updated Lucid description from "purpose under review" to its documented role (nightly journal curator, MemPalace ingestion via MCP, introduced in lucid v2.0.2).
 
 Changes from 1.3: coherence audit 2026-05-19 discovered 23 active OCAS skill repositories; added ocas-reach (Signal Layer), ocas-imagine (Execution Layer), ocas-google-workspace (Execution Layer), ocas-finch (System Evolution Layer), and ocas-lucid (Execution Layer) to the skill registry; re-activated 17 previously-archived skills (scout, sift, look, corvus, elephas, weave, praxis, voyage, rally, sands, custodian, taste, mentor, fellow, forge, vesper, bower, spot) whose GitHub repositories now exist; updated journal types table and cooperation flow to cover newly active skills; Relay removed from Interface Surfaces (repo still absent).
 
@@ -49,7 +51,7 @@ Skills that plan and execute actions in the world.
 - **Custodian** — system health monitoring. Error diagnosis, data integrity checks, and self-healing automation.
 - **Imagine** — art-direction engine for text-to-image generation. Applies the Narrative Style Creation & Transfer methodology to produce professionally art-directed image prompts and generation workflows.
 - **Google-Workspace** — Google Workspace integration. Provides Google Drive, Docs, Sheets, Calendar, and Gmail access via Workspace MCP with a `google_api.py` script fallback.
-- **Lucid** — purpose under review as of 2026-05-19 audit. Active repository exists; SKILL.md not yet read by this spec.
+- **Lucid** — nightly journal curator. Batch-processes OCAS skill journals into MemPalace's verbatim store via MCP tools. Runs as a scheduled cron job at 3am, classifying each journal for filing as a MemPalace drawer entry.
 
 ### Preference Layer
 
