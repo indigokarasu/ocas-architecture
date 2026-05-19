@@ -1,9 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.10.0
+Version: 2.10.1
 Author: Indigo Karasu
 
-Changes from 2.9.0: coherence audit 2026-05-19; re-activated 17 previously-archived skills whose GitHub repos now exist; added 5 new skills (ocas-reach, ocas-imagine, ocas-google-workspace, ocas-finch, ocas-lucid) to Responsibility Boundaries; updated Background Tasks note to reflect 2026-05-19 ecosystem state.
+Changes from 2.10.0: moved ocas-scout to the cron job list (scout:sources-refresh, weekly Sunday 6am, introduced in scout v3.0.0); removed ocas-scout from no-known-background-tasks list.
 
 Changes from 2.7.2: architecture coherence audit 2026-04-16 discovered 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Responsibility Boundaries list to add ocas-relay; updated Background Tasks section to reflect both active skills; minor version bump due to expansion of active skill count.
 
@@ -198,9 +198,9 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 Background task declarations below reflect known operational behavior as of 2026-05-19. Skills not listed here may have background tasks declared in their own SKILL.md; consult each skill's repository for authoritative information.
 
 - Skills with heartbeat entries: ocas-forge (intake poll), ocas-elephas (Chronicle ingestion), ocas-custodian (health check), ocas-corvus (journal scan), ocas-finch (session mining)
-- Skills with cron jobs: ocas-vesper (morning/evening briefing), ocas-sands (schedule sync), ocas-rally (market research cadence), ocas-mentor (OKR evaluation cycle)
+- Skills with cron jobs: ocas-vesper (morning/evening briefing), ocas-sands (schedule sync), ocas-rally (market research cadence), ocas-mentor (OKR evaluation cycle), ocas-scout (sources-refresh, weekly Sunday 6am)
 
-Skills with no known background tasks: ocas-scout, ocas-sift, ocas-look, ocas-reach, ocas-weave, ocas-taste, ocas-voyage, ocas-bower, ocas-spot, ocas-praxis, ocas-fellow, ocas-imagine, ocas-google-workspace, ocas-lucid
+Skills with no known background tasks: ocas-sift, ocas-look, ocas-reach, ocas-weave, ocas-taste, ocas-voyage, ocas-bower, ocas-spot, ocas-praxis, ocas-fellow, ocas-imagine, ocas-google-workspace, ocas-lucid
 
 **Note:** Skills with no active GitHub repository (ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage) are omitted from the active lists above.
 
