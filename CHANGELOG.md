@@ -1,3 +1,41 @@
+## [2026-05-19] Coherence audit — full ecosystem sync
+
+### Findings
+- Discovery audit 2026-05-19: found 23 active OCAS skill repositories under `indigokarasu` (via GitHub search). 17 previously-archived skills now have active repos; 5 repos are new and were not in the architecture at all (`ocas-finch`, `ocas-reach`, `ocas-imagine`, `ocas-google-workspace`, `ocas-lucid`). 7 skills still have no active repo and remain historical reference only (haiku, dispatch, thread, relay, multipass, vibes, triage).
+
+### Changes
+
+- **Updated spec-ocas-architecture.md: v1.3 → v1.4**
+  - Added Reach to Signal Layer
+  - Added Imagine, Google-Workspace, Lucid to Execution Layer
+  - Added Finch to System Evolution Layer
+  - Removed Relay from Interface Surfaces (repo still absent)
+  - Updated Haiku entry to note no active repository
+  - Updated Journal Types table to cover all active skills
+  - Updated Visibility section
+
+- **Updated spec-ocas-ontology.md: v2.2.0 → v2.3.0**
+  - Skill Entity Extraction Ownership table: re-activated 17 historical skills, added 5 new skills; updated historical reference list to only 7 skills with no repos
+  - Signal Emission Responsibilities table: same scope expansion
+
+- **Updated ocas-skill-authoring-rules.md: v2.9.0 → v2.10.0**
+  - Responsibility Boundaries: added all 23 active skills; moved 7 no-repo skills to historical-only note
+  - Background Tasks: updated to reflect 2026-05-19 ecosystem state
+
+- **Updated README.md**
+  - Active skill repositories table expanded from 3 to 23 entries
+  - Spec and build doc version numbers updated to current
+
+---
+
+## [2026-05-19] Added Claude API authentication spec
+
+### Added
+- **`spec-ocas-auth-claude.md` v1.0.0** — Claude API authentication patterns for OCAS skills and scripts: `ANTHROPIC_API_KEY` env var convention, model selection via config/env with module-level default constant, `claude auth login` runtime OAuth flow for Claude Code on the Web sessions, journal `model`/`provider` field requirement, security checklist, and anti-patterns.
+- **Updated README.md** — added `spec-ocas-auth-claude.md` to the Specifications table.
+
+---
+
 ## [2026-05-19] Added GitHub authentication spec
 
 ### Added
