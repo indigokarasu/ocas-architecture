@@ -1,3 +1,11 @@
+## [2026-05-19] Added GitHub authentication spec
+
+### Added
+- **`spec-ocas-auth-github.md` v1.0.0** — GitHub authentication patterns for OCAS skills and scripts: `GITHUB_TOKEN` env var convention, `~/.hermes/github_token.json` OAuth token storage schema, `gh` CLI self-update prerequisite, `claude auth github` runtime OAuth flow, security checklist, and anti-patterns.
+- **Updated README.md** — added `spec-ocas-auth-github.md` to the Specifications table.
+
+---
+
 ## [2026-04-23] Rally discovery and spec integration
 
 ### Findings
