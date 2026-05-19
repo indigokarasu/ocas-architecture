@@ -1,9 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.9.0
+Version: 2.10.0
 Author: Indigo Karasu
 
-Changes from 2.8.0: cross-reference new `spec-ocas-scripts.md` from the `scripts/` section. Minor bump because the rule expanded with new authoritative guidance, not just text.
+Changes from 2.9.0: coherence audit 2026-05-19; re-activated 17 previously-archived skills whose GitHub repos now exist; added 5 new skills (ocas-reach, ocas-imagine, ocas-google-workspace, ocas-finch, ocas-lucid) to Responsibility Boundaries; updated Background Tasks note to reflect 2026-05-19 ecosystem state.
 
 Changes from 2.7.2: architecture coherence audit 2026-04-16 discovered 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Responsibility Boundaries list to add ocas-relay; updated Background Tasks section to reflect both active skills; minor version bump due to expansion of active skill count.
 
@@ -195,10 +195,14 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 
 **Current active OCAS skills:**
 
-- Skills with heartbeat entries only: ocas-forge (intake poll)
-- Skills with cron jobs only: ocas-relay (update only)
+Background task declarations below reflect known operational behavior as of 2026-05-19. Skills not listed here may have background tasks declared in their own SKILL.md; consult each skill's repository for authoritative information.
 
-**Note:** This reflects the current OCAS ecosystem as of 2026-04-16. Additional skills (ocas-elephas, ocas-mentor, ocas-corvus, ocas-vesper, ocas-rally, ocas-thread, ocas-sands, ocas-haiku, ocas-custodian, ocas-dispatch, ocas-weave, ocas-scout, ocas-sift, ocas-look, ocas-taste, ocas-voyage, ocas-fellow, ocas-multipass, ocas-vibes, ocas-bower, ocas-spot, ocas-praxis, ocas-triage) are documented in these specs for historical reference and architecture integrity, but are not currently instantiated as repositories or released packages.
+- Skills with heartbeat entries: ocas-forge (intake poll), ocas-elephas (Chronicle ingestion), ocas-custodian (health check), ocas-corvus (journal scan), ocas-finch (session mining)
+- Skills with cron jobs: ocas-vesper (morning/evening briefing), ocas-sands (schedule sync), ocas-rally (market research cadence), ocas-mentor (OKR evaluation cycle)
+
+Skills with no known background tasks: ocas-scout, ocas-sift, ocas-look, ocas-reach, ocas-weave, ocas-taste, ocas-voyage, ocas-bower, ocas-spot, ocas-praxis, ocas-fellow, ocas-imagine, ocas-google-workspace, ocas-lucid
+
+**Note:** Skills with no active GitHub repository (ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage) are omitted from the active lists above.
 
 ### Idempotent registration
 
@@ -312,9 +316,30 @@ System skills must include:
 Before creating a new skill, verify it does not conflict with the following active OCAS skills:
 
 - ocas-forge — skill design, construction, and validation
-- ocas-relay — device gateway, telemetry ingestion, permission management
+- ocas-scout — OSINT research on people and organizations
+- ocas-sift — web search, research synthesis, fact verification, entity extraction
+- ocas-look — image-to-action processing
+- ocas-reach — live world-data query engine
+- ocas-corvus — exploratory pattern analysis across journals and knowledge graph
+- ocas-elephas — long-term knowledge graph (Chronicle) maintenance
+- ocas-weave — social relationship graph
+- ocas-praxis — behavioral refinement loop
+- ocas-voyage — travel planning, itinerary construction, reservation management
+- ocas-rally — portfolio research, candidate scoring, allocation planning, trade planning
+- ocas-sands — calendar management and scheduling
+- ocas-custodian — system health monitoring and self-healing
+- ocas-taste — behavior-driven taste and preference model
+- ocas-bower — Google Drive automatic organizer
+- ocas-spot — appointment booking automation
+- ocas-mentor — orchestration and evaluation engine
+- ocas-fellow — empirical experimentation engine
+- ocas-vesper — daily briefing generator
+- ocas-imagine — text-to-image art-direction engine
+- ocas-google-workspace — Google Workspace integration
+- ocas-finch — session self-improvement orchestrator
+- ocas-lucid — purpose under review (active repo; do not create a skill with overlapping scope without reading its SKILL.md first)
 
-Legacy reference (archived/non-existent): ocas-scout, ocas-sift, ocas-praxis, ocas-dispatch, ocas-corvus, ocas-mentor, ocas-elephas, ocas-weave, ocas-taste, ocas-voyage, ocas-look, ocas-rally, ocas-vesper, ocas-fellow, ocas-thread, ocas-custodian, ocas-haiku, ocas-bower, ocas-spot, ocas-sands, ocas-multipass, ocas-vibes, ocas-triage
+No active repository (historical reference only): ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
 
 Each skill build spec includes a Responsibility Boundary section.
 

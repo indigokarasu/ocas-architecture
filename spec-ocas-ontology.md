@@ -1,9 +1,9 @@
 # OCAS Shared Ontology
 
-Spec Version: 2.2.0
+Spec Version: 2.3.0
 Author: Indigo Karasu
 
-Changes from 2.1.0: architecture coherence audit 2026-04-23 found 3 active OCAS skill repositories (ocas-forge, ocas-relay, ocas-rally); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to include ocas-rally (extracts Thing securities + Concept/Event market events, emits both to Elephas); minor version bump due to expansion of active skill count.
+Changes from 2.2.0: coherence audit 2026-05-19 discovered 23 active OCAS skill repositories; re-activated 17 previously-archived skills whose GitHub repos now exist; added 5 new skills (ocas-reach, ocas-imagine, ocas-google-workspace, ocas-finch, ocas-lucid) to Skill Entity Extraction Ownership and Signal Emission Responsibilities tables; updated historical reference list to only include skills with no active GitHub repository (haiku, dispatch, thread, multipass, vibes, triage, relay).
 
 Changes from 2.0.1: architecture coherence audit 2026-04-16 found 2 active OCAS skill repositories (ocas-forge, ocas-relay); updated Skill Entity Extraction Ownership and Signal Emission Responsibilities tables to include ocas-relay (extracts Thing/DigitalArtifact from device attachments); minor version bump due to expansion of active skill count.
 
@@ -302,17 +302,37 @@ The authoritative record lives in the skill's database. Chronicle holds a pointe
 
 Every skill that extracts, manages, or emits entities must map its outputs to the types defined in this spec. The table below documents which entity types each skill is responsible for extracting or emitting as Signals.
 
-**Currently active OCAS skills (as of 2026-04-23):**
+**Currently active OCAS skills (as of 2026-05-19):**
 
 | Skill | Entity Types | Place Types | Concept Types | Thing Types | Notes |
 |---|---|---|---|---|---|
 | ocas-forge | — | — | — | — | Skill architect; does not extract entities or emit Signals |
-| ocas-relay | — | — | — | DigitalArtifact | Extracts device attachments; does not emit Signals |
-| ocas-rally | — | — | Event | Thing | Extracts securities (Thing) from the investable universe and material market events (Concept/Event: earnings, M&A, guidance revisions, analyst rating changes, 8-K filings, dividend events). Emits both to Elephas intake; toggle via `config.research_memory.emit_to_elephas` (default true). Maintains per-ticker research dossiers at `{agent_root}/commons/data/ocas-rally/research_dossiers/{TICKER}.md` as local working memory. |
+| ocas-rally | — | — | Event | Thing | Extracts securities (Thing) from the investable universe and material market events (Concept/Event: earnings, M&A, guidance revisions, analyst rating changes, 8-K filings, dividend events). Emits both to Elephas intake; toggle via `config.research_memory.emit_to_elephas` (default true). |
+| ocas-scout | Person, Entity | Place | Event | DigitalArtifact | OSINT research; extracts people, organizations, locations, and events |
+| ocas-sift | Person, Entity | Place | Event, Idea | DigitalArtifact | Web research and fact extraction; extracts entities, places, events, and concepts |
+| ocas-look | — | — | Action | DigitalArtifact | Image-to-action; extracts action decisions and digital artifacts from images |
+| ocas-reach | — | — | — | — | Live data query engine; passes through data from external sources; extraction handled by calling skill |
+| ocas-corvus | — | — | Idea | — | Pattern analysis; extracts behavioral ideas and opportunity signals from journal patterns |
+| ocas-elephas | Person, Entity | Place | Event, Idea, Action | Thing, DigitalArtifact | Chronicle writer; ingests and promotes all entity types |
+| ocas-weave | Person, Entity | — | Event | — | Social graph; extracts and maintains people and relationship records |
+| ocas-taste | — | — | Idea | Thing | Preference model; extracts consumption signals and item records |
+| ocas-voyage | — | Place | Event, Action | — | Travel planning; extracts destinations, itinerary events, and booking actions |
+| ocas-sands | — | — | Event, Action | — | Calendar management; extracts scheduling events and booking actions |
+| ocas-custodian | — | — | Action | — | System health; extracts and records operational failure events |
+| ocas-bower | — | — | Action | DigitalArtifact | Drive organizer; extracts file metadata and emits organization actions |
+| ocas-spot | — | Place | Action | — | Appointment booking; extracts venue places and booking actions |
+| ocas-praxis | — | — | Idea, Action | — | Behavioral refinement; records lessons and behavior-shift decisions |
+| ocas-mentor | — | — | Idea, Action | — | Evaluation engine; records OKR assessments and variant decisions |
+| ocas-fellow | — | — | Idea | — | Experimentation engine; records experiment lineage through Elephas |
+| ocas-vesper | — | — | Action | — | Briefing generator; records briefing delivery actions |
+| ocas-imagine | — | — | Action | DigitalArtifact | Image generation; records art-direction prompts and generated artifact references |
+| ocas-google-workspace | — | — | Action | DigitalArtifact | Workspace integration; records document, email, and calendar actions |
+| ocas-finch | — | — | Idea, Action | — | Session miner; extracts behavioral directives and improvement patches from session data |
+| ocas-lucid | — | — | — | — | Purpose under review as of 2026-05-19; entity extraction not yet documented |
 
-**Historical skill mappings (reference; skills not currently released):**
+**Historical skill mappings (reference; no active GitHub repository):**
 
-Skills not in this list do not extract entities and do not emit Signals to Elephas. Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-sands, ocas-dispatch, ocas-vesper, ocas-custodian, ocas-spot, ocas-haiku, ocas-bower, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
 
 **Rules:**
 - A skill's extracted entity types must be present in its emitted Signals' `payload.type` field.
@@ -325,17 +345,37 @@ Skills not in this list do not extract entities and do not emit Signals to Eleph
 
 Skills that extract entities must emit Signals to Elephas for Chronicle ingestion. This table documents the expected emission pattern for each extracting skill.
 
-**Currently active OCAS skills (as of 2026-04-23):**
+**Currently active OCAS skills (as of 2026-05-19):**
 
 | Skill | Emit Signals to Elephas? | Condition |
 |---|---|---|
 | ocas-forge | No | Skill architect; no entity signals |
-| ocas-relay | No | Device gateway; signal interpretation handled by downstream skills |
-| ocas-rally | Yes | On every `rally.research` run: Thing signals for investable-universe securities (when composite delta >= 0.05 or on a weekly per-ticker cadence) and Concept/Event signals for material events (earnings, M&A, guidance revisions, analyst rating changes, 8-K material content, dividend changes). Does not emit intraday ticks, holdings, pending-action state, or scored rumors. Controlled by `config.research_memory.emit_to_elephas` (default true). |
+| ocas-rally | Yes | On every `rally.research` run: Thing signals for investable-universe securities (delta >= 0.05 or weekly cadence) and Concept/Event signals for material events. Controlled by `config.research_memory.emit_to_elephas` (default true). |
+| ocas-scout | Yes | On every research run: Person and Entity signals for subjects researched, Place signals for locations found, Event signals for dated occurrences. |
+| ocas-sift | Yes | On entity-extraction runs: Person, Place, Event, Idea signals for entities found in source material. |
+| ocas-look | No | Action decisions are returned to caller; no Elephas emission. |
+| ocas-reach | No | Passes through external data to calling skill; calling skill is responsible for any Signal emission. |
+| ocas-corvus | No | Emits InsightProposals and BehavioralSignals to Vesper/Praxis intakes, not to Elephas. |
+| ocas-elephas | Yes | Chronicle writer; all ingested and promoted facts are its own writes. |
+| ocas-weave | No | Writes to its own LadybugDB; optionally emits Person signals to Elephas for Chronicle pointer creation. |
+| ocas-taste | No | Maintains local preference model; does not emit Signals to Elephas. |
+| ocas-voyage | No | Travel actions recorded in Action Journal; no Elephas emission. |
+| ocas-sands | No | Calendar actions recorded in Action Journal; no Elephas emission. |
+| ocas-custodian | No | Health events recorded locally; no Elephas emission. |
+| ocas-bower | No | File organization actions recorded in Action Journal; no Elephas emission. |
+| ocas-spot | No | Booking actions recorded in Action Journal; no Elephas emission. |
+| ocas-praxis | No | Behavioral records maintained locally; no Elephas emission. |
+| ocas-mentor | No | Evaluation records maintained locally; no Elephas emission. |
+| ocas-fellow | Yes | Experiment lineage stored through Elephas per spec. |
+| ocas-vesper | No | Briefing delivery actions recorded locally; no Elephas emission. |
+| ocas-imagine | No | Generation actions recorded in Action Journal; no Elephas emission. |
+| ocas-google-workspace | No | Workspace actions recorded in Action Journal; no Elephas emission. |
+| ocas-finch | No | Session mining results routed to MEMORY.md and skill patches; no Elephas emission. |
+| ocas-lucid | Unknown | Signal emission not yet documented; under review as of 2026-05-19. |
 
-**Historical skill patterns (reference; skills not currently released):**
+**Historical skill patterns (reference; no active GitHub repository):**
 
-Historical reference: ocas-scout, ocas-sift, ocas-look, ocas-thread, ocas-corvus, ocas-weave, ocas-taste, ocas-voyage, ocas-sands, ocas-dispatch, ocas-spot, ocas-haiku, ocas-bower, ocas-custodian, ocas-elephas, ocas-mentor, ocas-praxis, ocas-fellow, ocas-multipass, ocas-vibes, ocas-triage
+ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
 
 ---
 
