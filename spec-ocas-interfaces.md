@@ -1,7 +1,9 @@
 # OCAS Inter-Skill Interfaces
 
-Spec Version: 1.4.0
+Spec Version: 1.5.0
 Author: Indigo Karasu
+
+Changes from 1.4.0: updated Rally ↔ Sift Sentiment section to reflect rally v3.8.0 — social_heat is now handled by Rally directly via a local SearXNG instance (rally_data_sources.py), not via Sift. rumor_score and news_pulse via Sift remain as optional cooperation when Sift is present. Section renamed to Rally ↔ Sift: News Pulse and Rumor Score to reflect reduced scope.
 
 Changes from 1.3.4: added Rally ↔ Sift Sentiment Enrichment and News Pulse cooperative query row (four sentiment workflows: social_heat, rumor_score, short_interest, news_pulse via Sift -> SearchX -> SearXNG chain with x.com / Reddit / LinkedIn / news engines / SEC EDGAR); added Rally emission scope subsection under Elephas Signal Intake documenting Thing and Concept/Event signal types Rally writes to Chronicle intake. Reflects Rally v3.5.4 research memory and sentiment default-on.
 Changes from 1.3: added Sands → Vesper Schedule Brief Intake interface; added Sands to polling cadence table.
@@ -429,26 +431,27 @@ Taste may invoke Sift to enrich an extracted item (e.g., a restaurant, product, 
 
 Voyage may invoke Sift to enrich venue details, check transport options, or validate hours and pricing. Direct skill invocation in-session. If Sift is absent, Voyage proceeds with available data.
 
-### Rally ↔ Sift: Sentiment Enrichment and News Pulse
+### Rally ↔ Sift: News Pulse and Rumor Score
 
-Rally invokes Sift in-session during `rally.research` for four sentiment workflows when `config.sentiment.enabled: true` (default, as of Rally v3.5.4):
+As of rally v3.8.0, Rally's sentiment signal is split across two paths:
 
-1. `social_heat` - social-media mention velocity for a ticker/company name over the last 48 hours vs. 30-day baseline
-2. `rumor_score` - M&A / guidance / analyst-action keyword density plus SEC EDGAR insider-buy clusters
-3. `short_interest` - latest short-interest-as-pct-of-float (direct Yahoo Finance fetch; no Sift dependency)
-4. `news_pulse` - recent major-outlet headlines for dossier enrichment and rationale generation
+**Path 1 — Direct (no Sift dependency):**
+- `social_heat` — social-media mention velocity (48h vs. 30-day baseline on Reddit/Stocktwits) is now fetched directly by Rally via a locally-hosted SearXNG instance on port 8888, through `rally_data_sources.py`. Rally caches results at `{agent_root}/commons/data/ocas-rally/sentiment_cache.jsonl`. Sift is not involved.
+- `short_interest` — direct Yahoo Finance fetch; no Sift dependency (unchanged from v3.5.4).
 
-Sift routes these through its SearchX integration, which invokes a locally-hosted SearXNG instance aggregating x.com (via nitter), Reddit, LinkedIn, general news engines (Reuters, Bloomberg, WSJ, FT, CNBC, Benzinga), and filings-adjacent aggregators. If Sift has direct platform connectors enabled (Reddit API, x.com via agent-reach, LinkedIn), those augment the SearXNG results. SEC EDGAR queries go through Sift's filings path rather than SearXNG.
+**Path 2 — Via Sift (optional cooperation, when Sift is present):**
+Rally may invoke Sift in-session during `rally.research` for:
+- `rumor_score` — M&A / guidance / analyst-action keyword density plus SEC EDGAR insider-buy clusters
+- `news_pulse` — recent major-outlet headlines for dossier enrichment and rationale generation
 
-This is a direct in-session skill invocation, not a file read. Rally caches results in `{agent_root}/commons/data/ocas-rally/sentiment_cache.jsonl` and `news_cache.jsonl` (30-day rolling) so repeat queries in the same research window do not re-invoke Sift.
+Sift routes these through its SearchX integration (SearXNG + x.com, Reddit, LinkedIn, news engines, SEC EDGAR). SEC EDGAR queries go through Sift's filings path.
 
-Fallback hierarchy:
+Fallback hierarchy (Path 2):
 - Sift invocation succeeds: use results directly
-- Sift present but SearchX/SearXNG unreachable: Sift returns an error; Rally uses cached values if within `max_data_age_hours` (default 72)
-- Sift absent entirely: Rally skips sentiment and news_pulse, redistributes the 5% sentiment category weight to Momentum, and logs `"sift_unavailable_sentiment_skipped"` in `decisions.jsonl`
-- Rally never halts research because sentiment enrichment is unavailable
+- Sift present but SearchX/SearXNG unreachable: Rally uses cached values if within `max_data_age_hours` (default 72)
+- Sift absent entirely: Rally skips rumor_score and news_pulse, redistributes the 5% sentiment weight to Momentum, and logs `"sift_unavailable_sentiment_skipped"` in `decisions.jsonl`
 
-See `ocas-rally/references/research-and-scoring.md` Sentiment Enrichment section for the full scoring procedure.
+See `ocas-rally/references/research-and-scoring.md` for the full sentiment scoring procedure.
 
 ---
 
@@ -493,3 +496,4 @@ When a new inter-skill interface is needed:
 3. Bump this spec's minor version.
 
 Do not create undocumented inter-skill interfaces.
+

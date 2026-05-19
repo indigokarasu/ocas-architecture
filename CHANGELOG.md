@@ -1,3 +1,26 @@
+## [2026-05-19] Skill PR merge sync — scout v3.0.0, rally v3.8.0, reach v3.5.0
+
+### Changes
+
+- **Updated spec-ocas-shared-schemas.md: v1.1.4 → v1.2.0**
+  - Added `MCPDiscoveryRecord` domain extension (Scout): tracks runtime MCP server discovery attempts, cache hits, servers connected and used, per `scout.sources.discover` runs introduced in scout v3.0.0.
+  - Added `PersonToolRecord` domain extension (Scout): tracks individual person-specific OSINT tool invocations (sherlock, maigret, h8mail, theharvester, etc.) for OKR evaluation (`person_tool_coverage`), introduced in scout v3.0.0.
+
+- **Updated spec-ocas-interfaces.md: v1.4.0 → v1.5.0**
+  - Renamed "Rally ↔ Sift: Sentiment Enrichment and News Pulse" → "Rally ↔ Sift: News Pulse and Rumor Score" to reflect reduced scope.
+  - `social_heat` is now fetched by Rally directly via a local SearXNG instance (`rally_data_sources.py`, introduced in rally v3.8.0). Sift is no longer involved in the social_heat workflow.
+  - `short_interest` remains a direct Yahoo Finance fetch (unchanged).
+  - `rumor_score` and `news_pulse` remain as optional Sift cooperation when Sift is present.
+
+- **Updated spec-ocas-architecture.md: v1.4 → v1.4.1**
+  - Updated Lucid description from "purpose under review" to its actual role: nightly journal curator that batch-processes OCAS skill journals into MemPalace via MCP tools.
+
+- **Updated ocas-skill-authoring-rules.md: v2.10.0 → v2.10.1**
+  - Moved `ocas-scout` from "no known background tasks" to the cron jobs list: `scout:sources-refresh` (weekly Sunday 6am, scout v3.0.0).
+  - Moved `ocas-lucid` from "no known background tasks" to the cron jobs list: `lucid:dream` (nightly 3am).
+
+---
+
 ## [2026-05-19] Coherence audit — full ecosystem sync
 
 ### Findings
