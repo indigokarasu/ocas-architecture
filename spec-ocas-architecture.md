@@ -1,11 +1,11 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.3
+Spec Version: 1.4
 Author: Indigo Karasu
 
-Changes from 1.2: updated improvement loop to include Fellow as empirical evaluation engine between Mentor and Forge; updated Mentor description to include Workflow Plans system; updated shared schemas list to include ExperimentRequest, CycleResult, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision; updated interfaces section to reference new Mentor↔Fellow intake paths; added spec-ocas-workflow-plans.md to specification index.
+Changes from 1.3: coherence audit 2026-05-19 discovered 23 active OCAS skill repositories; added ocas-reach (Signal Layer), ocas-imagine (Execution Layer), ocas-google-workspace (Execution Layer), ocas-finch (System Evolution Layer), and ocas-lucid (Execution Layer) to the skill registry; re-activated 17 previously-archived skills (scout, sift, look, corvus, elephas, weave, praxis, voyage, rally, sands, custodian, taste, mentor, fellow, forge, vesper, bower, spot) whose GitHub repositories now exist; updated journal types table and cooperation flow to cover newly active skills; Relay removed from Interface Surfaces (repo still absent).
 
-Changes from 1.2: noted Relay as not yet active, with build spec in Todo/Relay/.
+Changes from 1.2: updated improvement loop to include Fellow as empirical evaluation engine between Mentor and Forge; updated Mentor description to include Workflow Plans system; updated shared schemas list to include ExperimentRequest, CycleResult, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision; updated interfaces section to reference new Mentor↔Fellow intake paths; added spec-ocas-workflow-plans.md to specification index.
 
 ---
 
@@ -27,6 +27,7 @@ Skills that observe, discover, and extract structured information from the envir
 - **Scout** — investigative OSINT research on people and organizations. Produces provenance-backed briefs.
 - **Sift** — web search, topic research, fact verification, and entity extraction. The system's general research engine.
 - **Look** — image-to-action processing. Converts user-provided images into validated, decision-ready drafts.
+- **Reach** — live world-data query engine. Normalizes queries across external data sources and returns structured results to calling skills.
 - **Thread** — personal web activity interpretation. Reconstructs browsing sessions and research threads from browser signals. Private skill.
 
 ### Memory Layer
@@ -46,6 +47,9 @@ Skills that plan and execute actions in the world.
 - **Rally** — governed portfolio research, candidate scoring, allocation planning, and trade planning.
 - **Sands** — calendar management. Natural-language scheduling, conflict detection, travel time insertion via Google Places API, and schedule brief emission to Vesper.
 - **Custodian** — system health monitoring. Error diagnosis, data integrity checks, and self-healing automation.
+- **Imagine** — art-direction engine for text-to-image generation. Applies the Narrative Style Creation & Transfer methodology to produce professionally art-directed image prompts and generation workflows.
+- **Google-Workspace** — Google Workspace integration. Provides Google Drive, Docs, Sheets, Calendar, and Gmail access via Workspace MCP with a `google_api.py` script fallback.
+- **Lucid** — purpose under review as of 2026-05-19 audit. Active repository exists; SKILL.md not yet read by this spec.
 
 ### Preference Layer
 
@@ -60,12 +64,12 @@ Skills that improve the system itself.
 - **Mentor** — orchestration and evaluation engine. Manages long-running workflows (including named Workflow Plans), analyzes journals from all skills, evaluates champion vs. challenger variants, and proposes skill improvements to Forge. Routes experiments to Fellow for empirical evaluation. Reads journals directly for evaluation (parallel to Elephas ingestion).
 - **Fellow** — empirical experimentation engine. Invoked exclusively by Mentor via intake file drop. Establishes a fresh baseline, generates and tests controlled variants within a constrained mutation surface, and returns the winning result with full lineage via CycleResult to Mentor's intake. Stores experiment lineage through Elephas.
 - **Forge** — skill architect and builder. Designs, builds, and validates Agent Skill packages. Consumes variant proposals from Mentor. Emits complete installable packages.
+- **Finch** — session self-improvement orchestrator. Mines agent session JSONL files to detect corrections, breakthroughs, methodologies, and behavioral directives. Routes findings to MEMORY.md and skill patches. Named for Darwin's finch; adaptive evolution of the system.
 
 ### Interface Surfaces
 
 - **Vesper** — daily briefing generator. Aggregates signals from Corvus, Dispatch, Rally, Sands, and other skills into morning and evening briefings. Presents outcomes without exposing internal processes.
-- **Haiku** — social media presence management for Bluesky. Content strategy, post generation with human-writing quality gate, follow maintenance, and haiku practice.
-- **Relay** — device gateway. Normalizes inbound device signals and manages permissions. Private skill. Build spec exists in `Todo/Relay/`; not yet active.
+- **Haiku** — social media presence management for Bluesky. Content strategy, post generation with human-writing quality gate, follow maintenance, and haiku practice. No active repository as of 2026-05-19.
 
 ---
 
@@ -192,18 +196,27 @@ Journal type by skill:
 | Scout | Observation, Research |
 | Sift | Observation, Research |
 | Look | Observation |
+| Reach | Observation, Research |
 | Taste | Observation |
 | Rally | Observation, Action |
 | Thread | Observation |
 | Weave | Observation, Action (sync/writeback) |
+| Bower | Observation, Action |
 | Elephas | Action |
 | Praxis | Action |
 | Dispatch | Action |
 | Voyage | Action |
+| Sands | Action |
+| Custodian | Action |
+| Imagine | Action |
+| Google-Workspace | Action |
+| Lucid | Action |
 | Vesper | Action |
 | Forge | Action |
 | Mentor | Action |
 | Fellow | Action |
+| Finch | Action |
+| Spot | Action |
 
 ---
 
@@ -242,8 +255,9 @@ See `spec-ocas-workflow-plans.md` for:
 
 ## Visibility
 
-- **Private skills** (must not be published or distributed): Dispatch, Relay, Thread
+- **Private skills** (must not be published or distributed): Dispatch, Thread
 - **All others**: public
+- **No active repository as of 2026-05-19**: Haiku, Dispatch, Thread, Relay
 
 ---
 
