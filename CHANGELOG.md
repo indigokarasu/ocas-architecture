@@ -12,9 +12,12 @@
   - `short_interest` remains a direct Yahoo Finance fetch (unchanged).
   - `rumor_score` and `news_pulse` remain as optional Sift cooperation when Sift is present.
 
+- **Updated spec-ocas-architecture.md: v1.4 → v1.4.1**
+  - Updated Lucid description from "purpose under review" to its actual role: nightly journal curator that batch-processes OCAS skill journals into MemPalace via MCP tools.
+
 - **Updated ocas-skill-authoring-rules.md: v2.10.0 → v2.10.1**
-  - Moved `ocas-scout` from "no known background tasks" to the cron jobs list.
-  - Added: `scout:sources-refresh` (weekly Sunday 6am, introduced in scout v3.0.0) to the cron list.
+  - Moved `ocas-scout` from "no known background tasks" to the cron jobs list: `scout:sources-refresh` (weekly Sunday 6am, scout v3.0.0).
+  - Moved `ocas-lucid` from "no known background tasks" to the cron jobs list: `lucid:dream` (nightly 3am).
 
 ---
 

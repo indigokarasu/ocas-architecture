@@ -198,9 +198,9 @@ Use **heartbeat** (entry in `HEARTBEAT.md`) when:
 Background task declarations below reflect known operational behavior as of 2026-05-19. Skills not listed here may have background tasks declared in their own SKILL.md; consult each skill's repository for authoritative information.
 
 - Skills with heartbeat entries: ocas-forge (intake poll), ocas-elephas (Chronicle ingestion), ocas-custodian (health check), ocas-corvus (journal scan), ocas-finch (session mining)
-- Skills with cron jobs: ocas-vesper (morning/evening briefing), ocas-sands (schedule sync), ocas-rally (market research cadence), ocas-mentor (OKR evaluation cycle), ocas-scout (sources-refresh, weekly Sunday 6am)
+- Skills with cron jobs: ocas-vesper (morning/evening briefing), ocas-sands (schedule sync), ocas-rally (market research cadence), ocas-mentor (OKR evaluation cycle), ocas-scout (sources-refresh, weekly Sunday 6am), ocas-lucid (dream, nightly 3am)
 
-Skills with no known background tasks: ocas-sift, ocas-look, ocas-reach, ocas-weave, ocas-taste, ocas-voyage, ocas-bower, ocas-spot, ocas-praxis, ocas-fellow, ocas-imagine, ocas-google-workspace, ocas-lucid
+Skills with no known background tasks: ocas-sift, ocas-look, ocas-reach, ocas-weave, ocas-taste, ocas-voyage, ocas-bower, ocas-spot, ocas-praxis, ocas-fellow, ocas-imagine, ocas-google-workspace
 
 **Note:** Skills with no active GitHub repository (ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage) are omitted from the active lists above.
 
