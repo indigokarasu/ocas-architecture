@@ -337,7 +337,7 @@ Before creating a new skill, verify it does not conflict with the following acti
 - ocas-imagine — text-to-image art-direction engine
 - ocas-google-workspace — Google Workspace integration
 - ocas-finch — session self-improvement orchestrator
-- ocas-lucid — purpose under review (active repo; do not create a skill with overlapping scope without reading its SKILL.md first)
+- ocas-lucid — nightly journal curator. Batch-processes OCAS skill journals into MemPalace's verbatim store via MCP tools. Runs as a scheduled cron job at 3am.
 
 No active repository (historical reference only): ocas-haiku, ocas-dispatch, ocas-thread, ocas-relay, ocas-multipass, ocas-vibes, ocas-triage
 
