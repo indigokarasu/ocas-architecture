@@ -1,9 +1,11 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.5.0
+Spec Version: 1.5.1
 Author: Indigo Karasu
 
-Changes from 1.4.1: coherence audit 2026-05-19 discovered 2 additional active private skill repositories not previously registered; added ocas-odds (Execution Layer) and ocas-inception (System Evolution Layer) to the skill registry; corrected Haiku status from "no active repository" to active private repository; updated journal types table to include Odds and Inception; updated Visibility section.
+Changes from 1.5.0: renamed ocas-odds to ocas-bones across all references; GitHub repo renamed indigokarasu/odds → indigokarasu/bones.
+
+Changes from 1.4.1: coherence audit 2026-05-19 discovered 2 additional active private skill repositories not previously registered; added ocas-bones (Execution Layer, formerly ocas-odds) and ocas-inception (System Evolution Layer) to the skill registry; corrected Haiku status from "no active repository" to active private repository; updated journal types table to include Bones and Inception; updated Visibility section.
 
 Changes from 1.3: coherence audit 2026-05-19 discovered 23 active OCAS skill repositories; added ocas-reach (Signal Layer), ocas-imagine (Execution Layer), ocas-google-workspace (Execution Layer), ocas-finch (System Evolution Layer), and ocas-lucid (Execution Layer) to the skill registry; re-activated 17 previously-archived skills (scout, sift, look, corvus, elephas, weave, praxis, voyage, rally, sands, custodian, taste, mentor, fellow, forge, vesper, bower, spot) whose GitHub repositories now exist; updated journal types table and cooperation flow to cover newly active skills; Relay removed from Interface Surfaces (repo still absent).
 
@@ -52,7 +54,7 @@ Skills that plan and execute actions in the world.
 - **Imagine** — art-direction engine for text-to-image generation. Applies the Narrative Style Creation & Transfer methodology to produce professionally art-directed image prompts and generation workflows.
 - **Google-Workspace** — Google Workspace integration. Provides Google Drive, Docs, Sheets, Calendar, and Gmail access via Workspace MCP with a `google_api.py` script fallback.
 - **Lucid** — nightly journal curator. Batch-processes OCAS skill journals into MemPalace's verbatim store via MCP tools. Runs as a scheduled cron job at 3am, classifying each journal for filing as a MemPalace drawer entry.
-- **Odds** — prediction market intelligence layer. Aggregates market data across Polymarket, Kalshi, Predictit, and other platforms. Researches outcomes using Sift, produces calibrated probability assessments with confidence levels, and identifies edge where assessment diverges from market pricing. Tracks accuracy over time. Emits Event signals to Elephas. Private skill.
+- **Bones** — prediction market intelligence layer. Aggregates market data across Polymarket, Kalshi, Predictit, and other platforms. Researches outcomes using Sift, produces calibrated probability assessments with confidence levels, and identifies edge where assessment diverges from market pricing. Tracks accuracy over time. Emits Event signals to Elephas. Private skill.
 
 ### Preference Layer
 
@@ -221,7 +223,7 @@ Journal type by skill:
 | Fellow | Action |
 | Finch | Action |
 | Spot | Action |
-| Odds | Observation, Research |
+| Bones | Observation, Research |
 | Inception | Action |
 
 ---
@@ -261,7 +263,7 @@ See `spec-ocas-workflow-plans.md` for:
 
 ## Visibility
 
-- **Private skills** (must not be published or distributed): Dispatch, Thread, Odds, Inception, Haiku
+- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku
 - **All others**: public
 - **No active repository**: Relay
 
