@@ -1,3 +1,35 @@
+## [2026-05-21] Rename ocas-odds → ocas-bones
+
+### Changes
+
+- **Renamed GitHub repo**: `indigokarasu/odds` → `indigokarasu/bones`
+- **Updated spec-ocas-architecture.md**: replaced all Odds/ocas-odds references with Bones/ocas-bones
+- **Updated ocas-skill-authoring-rules.md**: replaced ocas-odds with ocas-bones in Responsibility Boundaries
+
+---
+
+## [2026-05-19] Update mechanism audit + private repo discovery
+
+### Changes
+
+- **Updated spec-ocas-architecture.md: v1.4.1 → v1.5.0**
+  - Added ocas-odds (Execution Layer): prediction market intelligence across Polymarket, Kalshi, Predictit. Private skill.
+  - Added ocas-inception (System Evolution Layer): Docker-based full environment simulation engine. Private skill.
+  - Corrected Haiku status: active private repository (previously listed as "no active repository").
+  - Updated journal types table to include Odds (Observation, Research) and Inception (Action).
+  - Updated Visibility section: Odds, Inception, Haiku added to private skills list; Relay is now the only entry under "no active repository".
+
+- **Updated ocas-skill-authoring-rules.md: v2.10.1 → v2.10.2**
+  - Added ocas-odds, ocas-inception, ocas-haiku to Responsibility Boundaries list.
+  - Removed ocas-haiku from "no active repository" historical list.
+  - Removed ocas-relay from active skills list (has README but no SKILL.md).
+
+- **Update mechanism normalization across all skill repos**
+  - Added standard `## Self-update` section to: reach, finch, google-workspace, imagine, inception.
+  - Normalized `## Update command` stubs to full `## Self-update` in: bower, spot, rally.
+
+---
+
 ## [2026-05-19] Skill PR merge sync — scout v3.0.0, rally v3.8.0, reach v3.5.0
 
 ### Changes
