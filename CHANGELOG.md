@@ -1,3 +1,13 @@
+## [2026-05-21] Rename ocas-odds → ocas-bones
+
+### Changes
+
+- **Renamed GitHub repo**: `indigokarasu/odds` → `indigokarasu/bones`
+- **Updated spec-ocas-architecture.md**: replaced all Odds/ocas-odds references with Bones/ocas-bones
+- **Updated ocas-skill-authoring-rules.md**: replaced ocas-odds with ocas-bones in Responsibility Boundaries
+
+---
+
 ## [2026-05-19] Update mechanism audit + private repo discovery
 
 ### Changes
