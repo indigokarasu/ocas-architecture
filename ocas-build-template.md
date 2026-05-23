@@ -201,6 +201,8 @@ Every system skill SKILL.md must include:
 
 **Storage Layout** — data and journal paths under `{agent_root}/commons/`.
 
+**Recovery Behavior** — how the skill handles missed runs, failed executions, self-diagnosis, and escalation. Every scheduled run must write an evidence record (including no-op runs with `not_activity_reason`). Reference `spec-ocas-recovery.md`.
+
 **Visibility** — `public` or `private`.
 
 ---
@@ -320,6 +322,7 @@ Complete this block before giving the document to the coder LLM.
 - Responsibility Boundary:
 - Optional Skill Cooperation:
 - Journal Outputs:
+- Recovery Behavior:
 - Visibility:
 
 ### Trigger Tests
