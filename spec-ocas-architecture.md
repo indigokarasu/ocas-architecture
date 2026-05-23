@@ -261,6 +261,10 @@ See `spec-ocas-workflow-plans.md` for:
 
 ---
 
+## Recovery (cross-cutting)
+
+All scheduled skills implement self-recovery via the Durable Intent Queue and Execution Evidence Log patterns. See `spec-ocas-recovery.md` for the standard contract. Every skill that runs on a schedule, produces side effects, or maintains durable state implements: schedule gap detection, dependency degradation with fallback cascades, data integrity validation, idempotent self-repair with re-validation, and log compaction.
+
 ## Visibility
 
 - **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku
@@ -280,3 +284,9 @@ See `spec-ocas-workflow-plans.md` for:
 - Skills must function independently even when cooperating skills are absent.
 - Private skills must never be published or distributed.
 - All inter-skill data sharing uses defined intake paths or Chronicle/Weave queries.
+- Every scheduled run writes an evidence record, including when no side effects occur.
+- Skills never silently skip intended work; a no-op is always accompanied by a reason.
+- Self-repair attempts are logged as decision entries before execution.
+- After self-repair, re-validation confirms the fix before the repair is logged as successful.
+- Skills detect and recover from stale file locks on embedded databases.
+- Recovery logs are compacted (not blind-deleted) per `spec-ocas-recovery.md` thresholds.
