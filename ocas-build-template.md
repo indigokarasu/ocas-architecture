@@ -166,6 +166,10 @@ Journal path: `{agent_root}/commons/journals/ocas-{skill}/YYYY-MM-DD/{run_id}.js
 
 See `spec-ocas-journal.md` for the full journal specification.
 
+### Recovery Requirements
+
+Every scheduled run must also write an evidence record to `evidence.jsonl`, including runs where no side effects occur. The `not_activity_reason` field is mandatory for no-op runs. Schedule gap detection, dependency degradation with fallback cascades, data integrity validation, and self-repair with re-validation are required for all scheduled skills. Reference `spec-ocas-recovery.md`.
+
 ---
 
 ## Inter-Skill Interfaces
