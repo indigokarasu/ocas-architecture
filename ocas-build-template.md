@@ -141,9 +141,13 @@ Config must include ConfigBase fields. See `spec-ocas-shared-schemas.md`.
   config.json
   {primary_log}.jsonl
   decisions.jsonl
+  intents.jsonl            — durable intent queue (append-only)
+  evidence.jsonl           — execution evidence log (append-only)
 {agent_root}/commons/journals/ocas-{skill}/
   YYYY-MM-DD/{run_id}.json
 ```
+
+For recovery storage requirements, see `spec-ocas-recovery.md`.
 
 ---
 
@@ -250,6 +254,7 @@ All OCAS skills are built against these specifications:
 | `ocas-skill-authoring-rules.md` | Design principles, validation standard |
 | `spec-ocas-skill-publishing.md` | README, CHANGELOG, release structure |
 | `spec-ocas-scripts.md` | `scripts/` directory best practices, audit checklist |
+| `spec-ocas-recovery.md` | Recovery, self-diagnosis, self-repair, log compaction |
 
 ---
 
