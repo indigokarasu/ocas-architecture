@@ -1,3 +1,16 @@
+## [2026-07-14] Config policy: behavioral settings from config.yaml, not env vars
+
+### Changes
+
+- **`spec-ocas-scripts.md` (1.0.0 → 1.1.0)**: added **Configuration — behavioral vs. secrets** section. Behavioral settings (thresholds, paths, flags, feature toggles) MUST come from `config.yaml` under `skills.config.<key>` (read via PyYAML), never from `GENIE_*`/`<NAME>_*` environment variables. Secrets remain env/`.env`-based. Added matching audit-checklist items and an anti-pattern. Reference implementation: shipped `telephony.py` optional-skill.
+- **`spec-ocas-skill-publishing.md` (1.0.0 → 1.1.0)**: added **Configuration** README section requirement (document `skills.config.<key>` keys, never env-var names) and a sync-checklist gate item.
+
+### Why
+
+The Hermes optional-skills catalog enforces an `env-var-for-config` policy; the automated sweeper auto-closes PRs that read non-secret behavioral config from environment variables. OCAS skills that predate this policy (e.g. genie) must be migrated before submission. The `forge_audit_skills.py` tool in `ocas-forge` enforces the same check across all `ocas-*` skills; `ocas-skilllab` documents it in `nous-skill-requirements.md` (Configuration Policy).
+
+---
+
 ## [2026-05-21] Rename ocas-odds → ocas-bones
 
 ### Changes
