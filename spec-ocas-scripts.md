@@ -1,6 +1,6 @@
 # spec-ocas-scripts.md
 
-Version: 1.0.0
+Version: 1.1.0
 Author: Indigo Karasu
 
 ---
@@ -102,6 +102,52 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+---
+
+## Configuration — behavioral vs. secrets
+
+OCAS skills read two distinct kinds of configuration, and they use **different mechanisms**. Conflating them is a submission-blocking defect (the Hermes `env-var-for-config` policy auto-closes PRs that violate it).
+
+**Secrets / credentials** (API keys, OAuth tokens, passwords):
+- MAY be read from environment variables.
+- Standard location: `~/.hermes/.env` (loaded by the runtime; scripts read `os.environ`).
+- Declared in SKILL.md frontmatter via `required_environment_variables`.
+- A missing required secret is a fatal startup error (see Authentication & secrets above).
+
+**Behavioral settings** (retention thresholds, feature flags, display prefs, paths, dry-run toggles, rate limits):
+- MUST NOT be read from environment variables. `GENIE_*`, `<NAME>_MAX_AGE_DAYS`, `<NAME>_PATH`, `<NAME>_ENABLED`, etc. are all forbidden as user-facing controls.
+- MUST be declared in SKILL.md frontmatter under `metadata.hermes.config` with a logical key (e.g. `genie.snapshot_max_age_days`). The storage key becomes `skills.config.<key>`.
+- MUST be read at runtime from `$HERMES_HOME/config.yaml` under `skills.config.<key>`, falling back to the declared default when unset. Use PyYAML (Hermes already ships it). The shipped `telephony.py` optional-skill is the reference implementation.
+- MUST be documented in the SKILL.md Configuration section as `skills.config.<key>` — never as an env-var name.
+- MAY be overridden by a CLI flag (e.g. `--dry-run`), which takes precedence over `config.yaml`.
+
+**Runtime-locating variables** (`HERMES_HOME`, `HERMES_PROFILE`) are the only environment inputs permitted for non-secret purposes; they identify where the skill runs, not how it behaves.
+
+Correct pattern:
+```python
+def _skill_config(key, default):
+    """Resolve skills.config.<key> from config.yaml, fall back to default."""
+    import yaml
+    path = os.path.join(os.environ.get("HERMES_HOME", "~/.hermes"), "config.yaml")
+    try:
+        with open(os.path.expanduser(path)) as fh:
+            node = yaml.safe_load(fh) or {}
+    except OSError:
+        return default
+    for part in ("skills", "config", "<skill>", key):
+        node = node.get(part) if isinstance(node, dict) else None
+        if node is None:
+            return default
+    return node
+
+threshold = _skill_config("snapshot_max_age_days", 7)   # NOT os.environ.get("GENIE_SNAPSHOT_MAX_AGE_DAYS", 7)
+```
+
+Anti-pattern (rejects submission):
+```python
+threshold = int(os.environ.get("GENIE_SNAPSHOT_MAX_AGE_DAYS", 7))   # WRONG
 ```
 
 ---
@@ -229,6 +275,7 @@ Integration smoke tests (one real call per source) belong in `references/<source
 - **Scripts that return text-only "summaries"**: an agent cannot reliably parse prose. Return JSON.
 - **In-package state**: `scripts/state.json`, `scripts/cache/`, etc. State lives under `{agent_root}/commons/data/<skill>/`.
 - **Tracked compiled artifacts**: `__pycache__/`, `*.pyc`, build outputs. Add `.gitignore` and `git rm -r --cached`.
+- **Behavioral config in env vars**: `GENIE_SNAPSHOT_MAX_AGE_DAYS`, `<NAME>_PATH`, `<NAME>_ENABLED`, etc. These must come from `config.yaml` (`skills.config.<key>`), not `os.environ`. Secrets are the only thing that belongs in env/`.env`.
 - **Cross-skill Python imports**: `from ocas_other_skill.scripts.x import y`. Use the documented interface.
 - **Script that does the SKILL's job**: a single bloated script that drives the entire skill workflow end-to-end. Skills are routed by the agent; scripts are tools. If a script encodes the routing, the routing belongs in SKILL.md.
 
@@ -250,5 +297,7 @@ When reviewing a skill's `scripts/` directory:
 - [ ] Each script's docstring includes Usage, one Example, and the auth env-var name
 - [ ] Idempotency: repeated runs don't double-write or corrupt state
 - [ ] Errors return non-zero exit codes; no silent failures
+- [ ] **Behavioral config** (thresholds, paths, flags) read from `config.yaml` `skills.config.<key>`, NOT env vars — no `GENIE_*`/`<NAME>_*` env reads in `scripts/`
+- [ ] Every behavioral setting declared in `metadata.hermes.config`; SKILL.md documents `skills.config.<key>` (not env-var names)
 
 A skill failing two or more boxes is not ready. A skill failing on auth or boundary discipline must not ship.
