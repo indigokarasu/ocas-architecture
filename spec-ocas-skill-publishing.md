@@ -1,6 +1,6 @@
 # spec-ocas-skill-publishing.md
 
-Version: 1.0.0
+Version: 1.1.0
 Author: Indigo Karasu
 
 ---
@@ -63,6 +63,12 @@ and are compatible with OpenClaw, Hermes Agent, and any agentskills.io-compliant
 - One short paragraph describing what `{skill}.init` does automatically
 - If no manual setup is required, say so explicitly
 - If any optional credentials or binaries are needed, list them here (one line each)
+- If the skill reads behavioral config from `config.yaml` (`skills.config.<key>`), state that here and point to the SKILL.md Configuration section. Do **not** instruct users to set environment variables for non-secret tuning — that is a submission-blocking anti-pattern (see `spec-ocas-scripts.md` → Configuration).
+
+**Configuration** (required when the skill has any `metadata.hermes.config` keys)
+- Markdown table: `| Config key (`skills.config.<key>`) | Default | Description |`
+- One row per declared key, sourced from `metadata.hermes.config`
+- Never document env-var names (`GENIE_*`, `<NAME>_*`) as the user-facing control
 
 **Dependencies**
 - Two subsections: `**OCAS Skills**` and `**External**`
@@ -172,3 +178,4 @@ Before pushing a version bump:
 - [ ] README.md Changelog section updated with new entry
 - [ ] All four version references match (`SKILL.md`, `CHANGELOG.md`, `README.md`, release tag)
 - [ ] GitHub release created with tag `vX.Y.Z` and CHANGELOG body as release notes
+- [ ] Behavioral config documented as `skills.config.<key>` in both SKILL.md and README (no env-var names); no `GENIE_*`/`<NAME>_*` reads remain in `scripts/`
