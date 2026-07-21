@@ -1,7 +1,7 @@
 # ocas-architecture
 
 <p align="center">
-<img src="./assets/readme/hero.svg" width="100%" alt="OCAS system architecture specifications, schemas, and design documents">
+<img src="./assets/readme/hero.jpg" width="100%" alt="OCAS system architecture specifications, schemas, and design documents">
 </p>
 
 ocas-architecture — OCAS system architecture specifications, schemas, and design documents
