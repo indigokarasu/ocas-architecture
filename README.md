@@ -10,3 +10,7 @@ OCAS architecture documentation: system specs, schema definitions, and design do
 - System-layer specifications
 - Data schema definitions
 - Integration contracts between skills
+
+---
+## 📄 License
+MIT License — see `LICENSE` for details.
