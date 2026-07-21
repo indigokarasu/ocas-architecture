@@ -1,14 +1,12 @@
 # ocas-architecture
 
 <p align="center">
-<img src="./assets/readme/hero.jpg" width="100%" alt="OCAS system architecture specifications, schemas, and design documents">
+  <img src="./assets/readme/hero.jpg" width="100%" alt="OCAS system architecture specifications, schemas, and design documents">
 </p>
 
-ocas-architecture — OCAS system architecture specifications, schemas, and design documents
+OCAS architecture documentation: system specs, schema definitions, and design documents for the OCAS agent suite.
 
-
-> Tell it what you need. It does the work.
-
----
-
-*ocas-architecture is part of the [OCAS Agent Suite](https://github.com/indigokarasu).*
+**Contents:**
+- System-layer specifications
+- Data schema definitions
+- Integration contracts between skills
