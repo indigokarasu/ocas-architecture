@@ -477,6 +477,6 @@ Verify:
 
 Every skill includes consistent author metadata:
 - Author: Indigo Karasu
-- Email: mx.indigo.karasu@gmail.com
+- Email: <third-party-or-user-email>
 
 Descriptions are optimized for discovery, not brand voice.
