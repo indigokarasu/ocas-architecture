@@ -22,7 +22,7 @@ The output is the actual skill package -- not a planning memo, not a worksheet, 
 
 ### Author metadata
 - Author: Indigo Karasu
-- Email: mx.indigo.karasu@gmail.com
+- Email: <third-party-or-user-email>
 
 ### Skill type
 Choose one: shortcut / workflow / system
@@ -81,7 +81,7 @@ Minimum required fields:
 - `version`: `{version}`
 - `description`: routing-optimized text
 - `author`: `Indigo Karasu`
-- `email`: `mx.indigo.karasu@gmail.com`
+- `email`: `<third-party-or-user-email>`
 
 ### Description Requirements
 

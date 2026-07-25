@@ -171,7 +171,7 @@ Scripts respect `spec-ocas-storage-conventions.md`:
   - `{agent_root}/commons/data/<skill-name>/` — config, JSONL logs, ephemeral state
   - `{agent_root}/commons/journals/<skill-name>/` — journal files
   - `{agent_root}/commons/db/<skill-name>/` — LadybugDB files (DB-backed skills only)
-- Resolve `agent_root` once at module load: `Path(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")))`. Never hardcode `/root/.hermes/` — it breaks on machines that aren't the production host.
+- Resolve `agent_root` once at module load: `Path(os.environ.get("HERMES_HOME", os.path.expanduser("~/.hermes")))`. Never hardcode `<hermes-home>/` — it breaks on machines that aren't the production host.
 - Never use `__file__`-relative paths to write data. The skill package may be installed read-only or in a path that varies between runtimes.
 
 ---
@@ -269,7 +269,7 @@ Integration smoke tests (one real call per source) belong in `references/<source
 ## Anti-patterns
 
 - **Stale variants**: `pipeline.py`, `pipeline_v2.py`, `pipeline_v3.py` all in the same directory. Pick one. Delete the others. (Versions live in git history and CHANGELOG.md.)
-- **Hardcoded host paths**: `/root/.hermes/...` baked into source. Use the env-var resolution pattern.
+- **Hardcoded host paths**: `<hermes-home>/...` baked into source. Use the env-var resolution pattern.
 - **Swallowed exceptions**: `try: ... except Exception: pass`. The agent has no way to know the work didn't happen.
 - **Silent fallbacks**: trying credentials A, then silently switching to credentials B on failure. The operator will not know which credential set is actually in use.
 - **Scripts that return text-only "summaries"**: an agent cannot reliably parse prose. Return JSON.
