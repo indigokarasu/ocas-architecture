@@ -1,7 +1,9 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.5.1
+Spec Version: 1.6.0
 Author: Indigo Karasu
+
+Changes from 1.5.1: added spec-ocas-skill-improvements.md to specification index covering declarative evals (Skillgrade integration), response formats (`concise` vs `detailed`), actionable error envelopes, conditional activation, skill bundles, and staged write approval gating.
 
 Changes from 1.5.0: renamed ocas-odds to ocas-bones across all references; GitHub repo renamed indigokarasu/odds → indigokarasu/bones.
 
@@ -36,9 +38,9 @@ Skills that observe, discover, and extract structured information from the envir
 
 ### Memory Layer
 
-Skills that maintain durable structured knowledge.
+Skills and system plugins that maintain durable structured knowledge.
 
-- **Elephas (Chronicle)** — the system's long-term knowledge graph. Ingests journals from all skills, promotes facts, resolves entity identity, and generates behavioral inferences. Only Elephas writes to Chronicle.
+- **Chronicle Plugin (`chronicle-agent-context-and-memory`)** — the system's long-term knowledge graph (supersedes legacy `ocas-elephas`). Local-first SQLite store that ingests journals from all skills, promotes facts, resolves entity identity, and generates behavioral inferences. Chronicle is the exclusive writer to the long-term knowledge graph.
 - **Weave** — the social relationship graph. Maintains provenance-backed records of people, relationships, preferences, and shared experiences. Standalone LadybugDB database.
 
 ### Execution Layer
@@ -259,6 +261,17 @@ See `spec-ocas-workflow-plans.md` for:
 - plan run tracking and state schema
 - invocation patterns (manual, cron, heartbeat)
 
+See `spec-ocas-skill-improvements.md` for:
+- declarative evaluation suite schemas (`eval.yaml`) and pass-rate thresholds for Fellow/Mentor evaluation
+- response format standards (`concise` vs `detailed`) and actionable error envelopes
+- conditional activation metadata (`requires_tools`, `fallback_for_tools`)
+- skill bundles (`references/bundles/`) for multi-skill workflow aliases
+- progressive disclosure knowledge-base skill authoring standards
+- quality linters and staged write approval gates for agent-created skill patches
+
+See `spec-ocas-suite-cross-skill-updates.md` for:
+- comprehensive suite-wide cross-skill upgrade proposals for all active components in the `indigokarasu` suite
+
 ---
 
 ## Recovery (cross-cutting)
@@ -267,9 +280,9 @@ All scheduled skills implement self-recovery via the Durable Intent Queue and Ex
 
 ## Visibility
 
-- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku
+- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku, Rally
 - **All others**: public
-- **No active repository**: Relay
+- **Archived / Superseded**: Elephas (superseded by `chronicle-agent-context-and-memory` plugin), Corvus (superseded by `finch` and `mentor`), Relay, Triage, Vibes
 
 ---
 

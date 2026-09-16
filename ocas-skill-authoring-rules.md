@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.10.3
+Version: 2.11.0
 Author: Indigo Karasu
+
+Changes from 2.10.3: updated rules to reference spec-ocas-skill-improvements.md, including evaluation suites (eval.yaml), concise/detailed response formats, actionable error envelopes, conditional activation, skill bundles, and quality linters.
 
 Changes from 2.10.2: renamed ocas-odds to ocas-bones in Responsibility Boundaries.
 
@@ -324,8 +326,7 @@ Before creating a new skill, verify it does not conflict with the following acti
 - ocas-sift — web search, research synthesis, fact verification, entity extraction
 - ocas-look — image-to-action processing
 - ocas-reach — live world-data query engine
-- ocas-corvus — exploratory pattern analysis across journals and knowledge graph
-- ocas-elephas — long-term knowledge graph (Chronicle) maintenance
+- chronicle-agent-context-and-memory — long-term knowledge graph (Chronicle plugin, supersedes ocas-elephas)
 - ocas-weave — social relationship graph
 - ocas-praxis — behavioral refinement loop
 - ocas-voyage — travel planning, itinerary construction, reservation management
@@ -430,6 +431,10 @@ To add a bundled plan:
 See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
 ---
+
+## Evaluation & Benchmark Standard
+
+Skills expected to undergo automated evaluation or evolution via `ocas-mentor` and `ocas-fellow` should include a declarative evaluation suite under `references/evals/eval.yaml` per `spec-ocas-skill-improvements.md`. Evaluation suites define deterministic and LLM rubric tasks that `ocas-fellow` executes in isolated Docker containers (`ocas-inception`).
 
 ## Validation Standard
 
