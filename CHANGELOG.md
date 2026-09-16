@@ -1,3 +1,27 @@
+## [2026-07-15] Suite-wide cross-skill updates specification
+
+### Changes
+- **`spec-ocas-suite-cross-skill-updates.md` (v1.0.0)**: Added new architecture spec documenting comprehensive cross-skill upgrade proposals across all active components in the `indigokarasu` suite.
+- **`spec-ocas-architecture.md` (1.6.0)**: Updated Memory Layer section documenting that `ocas-elephas` is superseded by the `chronicle-agent-context-and-memory` plugin. Updated Visibility section marking `ocas-rally` as a private skill.
+- **`ocas-skill-authoring-rules.md` (2.11.0)**: Replaced `ocas-elephas` with `chronicle-agent-context-and-memory` in Responsibility Boundaries.
+
+---
+
+## [2026-07-15] Skill architecture improvements specification
+
+### Changes
+- **`spec-ocas-skill-improvements.md` (v1.0.0)**: Added new architecture spec detailing skill improvements derived from Hermes Agent, AgentSkills.io, Skillgrade, and Anthropic Engineering.
+  - Declarative eval suites (`eval.yaml`) and pass-rate promotion thresholds for `ocas-fellow` / `ocas-mentor`.
+  - Context-aware response formatting (`concise` vs `detailed`) and actionable error envelopes.
+  - Conditional activation (`requires_tools`, `fallback_for_tools`) and skill bundles (`references/bundles/`).
+  - Knowledge-base skill progressive disclosure patterns.
+  - Automated quality linters and staged write approval gating for agent-created skill patches.
+- **`spec-ocas-architecture.md` (1.5.1 → 1.6.0)**: Updated specification index and versioning to reference `spec-ocas-skill-improvements.md`.
+- **`ocas-skill-authoring-rules.md` (2.10.3 → 2.11.0)**: Updated rules to reference evaluation suites and skill improvement standards.
+- **`README.md`**: Updated contents list to include `spec-ocas-skill-improvements.md`.
+
+---
+
 ## [2026-07-14] Config policy: behavioral settings from config.yaml, not env vars
 
 ### Changes
