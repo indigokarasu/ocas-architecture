@@ -11,7 +11,6 @@ OCAS architecture documentation: system specs, schema definitions, and design do
 - Data schema definitions
 - Integration contracts between skills
 - Skill improvement specifications and evaluation guidelines (`spec-ocas-skill-improvements.md`)
-- Suite-wide cross-skill update proposals (`spec-ocas-suite-cross-skill-updates.md`)
 
 ---
 ## 📄 License

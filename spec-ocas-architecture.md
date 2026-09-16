@@ -38,9 +38,9 @@ Skills that observe, discover, and extract structured information from the envir
 
 ### Memory Layer
 
-Skills and system plugins that maintain durable structured knowledge.
+Skills that maintain durable structured knowledge.
 
-- **Chronicle Plugin (`chronicle-agent-context-and-memory`)** — the system's long-term knowledge graph (supersedes legacy `ocas-elephas`). Local-first SQLite store that ingests journals from all skills, promotes facts, resolves entity identity, and generates behavioral inferences. Chronicle is the exclusive writer to the long-term knowledge graph.
+- **Elephas (Chronicle)** — the system's long-term knowledge graph. Ingests journals from all skills, promotes facts, resolves entity identity, and generates behavioral inferences. Only Elephas writes to Chronicle.
 - **Weave** — the social relationship graph. Maintains provenance-backed records of people, relationships, preferences, and shared experiences. Standalone LadybugDB database.
 
 ### Execution Layer
@@ -269,9 +269,6 @@ See `spec-ocas-skill-improvements.md` for:
 - progressive disclosure knowledge-base skill authoring standards
 - quality linters and staged write approval gates for agent-created skill patches
 
-See `spec-ocas-suite-cross-skill-updates.md` for:
-- comprehensive suite-wide cross-skill upgrade proposals for all active components in the `indigokarasu` suite
-
 ---
 
 ## Recovery (cross-cutting)
@@ -280,9 +277,9 @@ All scheduled skills implement self-recovery via the Durable Intent Queue and Ex
 
 ## Visibility
 
-- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku, Rally
+- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku
 - **All others**: public
-- **Archived / Superseded**: Elephas (superseded by `chronicle-agent-context-and-memory` plugin), Corvus (superseded by `finch` and `mentor`), Relay, Triage, Vibes
+- **No active repository**: Relay
 
 ---
 
