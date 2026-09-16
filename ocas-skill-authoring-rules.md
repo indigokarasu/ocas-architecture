@@ -1,7 +1,9 @@
 # OCAS Skill Authoring Rules
 
-Version: 2.10.3
+Version: 2.11.0
 Author: Indigo Karasu
+
+Changes from 2.10.3: updated rules to reference spec-ocas-skill-improvements.md, including evaluation suites (eval.yaml), concise/detailed response formats, actionable error envelopes, conditional activation, skill bundles, and quality linters.
 
 Changes from 2.10.2: renamed ocas-odds to ocas-bones in Responsibility Boundaries.
 
@@ -430,6 +432,10 @@ To add a bundled plan:
 See `spec-ocas-workflow-plans.md` for the plan file format and parameter specification.
 
 ---
+
+## Evaluation & Benchmark Standard
+
+Skills expected to undergo automated evaluation or evolution via `ocas-mentor` and `ocas-fellow` should include a declarative evaluation suite under `references/evals/eval.yaml` per `spec-ocas-skill-improvements.md`. Evaluation suites define deterministic and LLM rubric tasks that `ocas-fellow` executes in isolated Docker containers (`ocas-inception`).
 
 ## Validation Standard
 
