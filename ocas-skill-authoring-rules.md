@@ -326,7 +326,8 @@ Before creating a new skill, verify it does not conflict with the following acti
 - ocas-sift — web search, research synthesis, fact verification, entity extraction
 - ocas-look — image-to-action processing
 - ocas-reach — live world-data query engine
-- chronicle-agent-context-and-memory — long-term knowledge graph (Chronicle plugin, supersedes ocas-elephas)
+- ocas-corvus — exploratory pattern analysis across journals and knowledge graph
+- ocas-elephas — long-term knowledge graph (Chronicle) maintenance
 - ocas-weave — social relationship graph
 - ocas-praxis — behavioral refinement loop
 - ocas-voyage — travel planning, itinerary construction, reservation management
