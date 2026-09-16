@@ -1,7 +1,9 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.5.1
+Spec Version: 1.6.0
 Author: Indigo Karasu
+
+Changes from 1.5.1: added spec-ocas-skill-improvements.md to specification index covering declarative evals (Skillgrade integration), response formats (`concise` vs `detailed`), actionable error envelopes, conditional activation, skill bundles, and staged write approval gating.
 
 Changes from 1.5.0: renamed ocas-odds to ocas-bones across all references; GitHub repo renamed indigokarasu/odds → indigokarasu/bones.
 
@@ -258,6 +260,14 @@ See `spec-ocas-workflow-plans.md` for:
 - the Workflow Plans format and parameter system
 - plan run tracking and state schema
 - invocation patterns (manual, cron, heartbeat)
+
+See `spec-ocas-skill-improvements.md` for:
+- declarative evaluation suite schemas (`eval.yaml`) and pass-rate thresholds for Fellow/Mentor evaluation
+- response format standards (`concise` vs `detailed`) and actionable error envelopes
+- conditional activation metadata (`requires_tools`, `fallback_for_tools`)
+- skill bundles (`references/bundles/`) for multi-skill workflow aliases
+- progressive disclosure knowledge-base skill authoring standards
+- quality linters and staged write approval gates for agent-created skill patches
 
 ---
 
