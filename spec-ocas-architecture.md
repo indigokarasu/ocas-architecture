@@ -208,14 +208,18 @@ Scheduled and side-effecting components follow `spec-ocas-recovery.md`: durable 
 
 ## Specification index
 
-- `components.json` — canonical component registry and lifecycle state
-- `spec-ocas-interfaces.md` — cross-component contracts
-- `spec-ocas-storage-conventions.md` — persistence and interface storage rules
-- `spec-ocas-shared-schemas.md` — canonical shared data objects
-- `spec-ocas-journal.md` — immutable run journals
-- `spec-ocas-recovery.md` — durable intent, evidence and repair
-- `spec-ocas-workflow-plans.md` — durable workflow plans
-- `spec-ocas-ontology.md` — shared entity/relationship semantics
-- `spec-ocas-skill-improvements.md` — evaluation and evolution
-- `ocas-skill-authoring-rules.md` — skill authoring rules
-- `ocas-build-template.md` — implementation template
+- components.json — canonical component registry and lifecycle state
+- spec-ocas-component-registry.md — registry semantics and drift rules
+- spec-ocas-principals-and-memory-boundaries.md — user/agent ownership, correction and erasure
+- spec-ocas-user-dreaming.md — user-only offline consolidation
+- spec-ocas-runtime-contracts.md — capabilities, credentials, task/provenance/artifact/introspection contracts
+- spec-ocas-interfaces.md — cross-component communication
+- spec-ocas-storage-conventions.md — private state, journals, queues, exports and runtime storage
+- spec-ocas-shared-schemas.md — canonical cross-component objects
+- spec-ocas-journal.md — immutable run/evaluation evidence
+- spec-ocas-recovery.md — durable intent, leases, evidence and verified repair
+- spec-ocas-workflow-plans.md — durable workflow plans
+- spec-ocas-ontology.md — entity/relationship semantics
+- spec-ocas-skill-improvements.md — evaluation and evolution
+- ocas-skill-authoring-rules.md — authoring rules
+- ocas-build-template.md — implementation template
