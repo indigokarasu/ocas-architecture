@@ -1,213 +1,205 @@
-# OCAS Dreaming and Learning Boundaries
+# OCAS Dreaming and Learning Boundary Map
 
-Status: normative architecture  
+Spec Version: 1.0.0  
+Status: normative supplement  
 Date: 2026-09-27
 
-## Purpose
+## Authority and scope
 
-OCAS has three different kinds of learning that must not collapse into one
-memory or promotion path:
+This specification supplements:
 
-1. learning descriptive facts and recurrent behavior about the user;
-2. learning how this agent should relate to that user;
-3. learning who the agent is becoming and how the system itself should improve.
+- `spec-ocas-architecture.md`;
+- `spec-ocas-user-dreaming.md`;
+- `spec-ocas-principals-and-memory-boundaries.md`;
+- `spec-ocas-storage-conventions.md`.
 
-The same interaction can produce evidence for all three, but each conclusion
-has a different owner, scope, retention policy, and promotion gate.
+If a rule here conflicts with one of those ownership or principal contracts,
+the more specific existing contract wins.
 
-This specification defines those ownership boundaries.
+The purpose of this document is to keep three learning loops from collapsing
+into one another:
+
+1. understanding the user;
+2. understanding the agent's own evolving identity;
+3. improving agent/system behavior and implementation.
+
+A single interaction may provide evidence to all three loops. Their derived
+records remain separate.
 
 ## Core invariant
 
-A fact about the user, a relationship adaptation, a system improvement, and a
-claim about the agent's identity are different epistemic objects.
+A user-owned fact or relationship interpretation, an agent-owned
+autobiographical insight, and a system-improvement lesson are different
+epistemic objects.
 
-No component may promote one into another merely because the text sounds
-similar.
+Shared evidence does not transfer ownership.
 
-## The three learning loops
+## 1. User evidence and User Dreaming
 
-### 1. User/world evidence loop — Chronicle
+Chronicle is the canonical principal-scoped durable memory/evidence substrate.
 
-Chronicle is the canonical evidence and memory layer.
+User Dreaming is the offline consolidation process defined by
+`spec-ocas-user-dreaming.md`. It may derive stable preferences, temporal
+relationships, recurring context, relationship patterns, contradictions,
+interests, goals and projection hints from eligible user-grounded evidence.
 
-It owns:
+Accepted durable User Dreaming results:
 
-- durable interaction events and source provenance;
-- speaker attribution and principal ownership;
-- factual/episodic/semantic memory;
-- contradictions, confidence and retrieval;
-- descriptive recurrent interaction-pattern mining.
+- belong to the user principal;
+- preserve provenance to user-grounded evidence;
+- are written through sanctioned Chronicle contracts;
+- do not become agent identity;
+- do not directly activate agent behavioral shifts.
 
-Chronicle may say:
+Chronicle may also expose descriptive interaction-pattern evidence, such as
+recurrent corrections or repeated requests, provided those patterns preserve
+authoritative event references and remain descriptive rather than becoming
+behavioral policy inside Chronicle.
 
-> User messages repeatedly reject unnecessary confirmation in comparable
-> interactions. Support: 7 events across 4 sessions.
+## 2. Shared Dreaming kernel domains
 
-Chronicle must not turn that observation into:
+A portable Dreaming implementation may share orchestration, evidence,
+candidate, verification, temporal and gating machinery across domains. It must
+not share derived state across principals or subjects.
 
-> Always proceed without asking.
+Two staging domains are permitted:
 
-The latter is behavioral policy and belongs to relationship Dreaming.
+### relationship
 
-Chronicle interaction patterns therefore carry `scope: descriptive_only` and
-authoritative event ids.
+The `relationship` domain stages user-owned relationship interpretations.
 
-### 2. Relationship-learning loop — Dreaming relationship domain
+Its subject is the user principal. It may consume Chronicle evidence and
+descriptive interaction patterns. A promoted kernel candidate is still only a
+staged/accepted derivation until it is durably committed through the User
+Dreaming/Chronicle contract.
 
-Relationship Dreaming owns the evolving posture between a user and an agent.
+It is not a separate durable-memory authority and it does not directly activate
+agent behavior.
 
-It asks questions such as:
+Runtime relationship or user-context hints must be rebuildable projections from
+verified user-owned state, not a second canonical relationship database.
 
-- What produces trust or friction with this user?
-- Which behavior is stable versus task-specific?
-- Was a correction about verbosity, sequencing, initiative, fidelity,
-  uncertainty or something else?
-- What should the agent try differently next time?
-- Did the adaptation improve later interactions?
-- Is the lesson strong enough to become a default for this relationship?
+### self
 
-Its inputs are evidence references, primarily Chronicle events and Chronicle
-descriptive interaction patterns.
+The `self` domain stages agent-owned reflection about the agent's own
+behavior.
 
-Its outputs are scoped relationship claims/posture. These are neither Chronicle
-facts nor SOUL identity.
+Its subject is the active agent principal. A promoted self candidate is
+eligible evidence for the autobiographical growth system; it is not an
+automatic identity edit.
 
-The relationship domain uses candidate -> verify -> gate -> promote semantics.
-`hold` and `block` may never change live posture.
+Autobio/SOUL remains authoritative for agent identity evolution.
 
-### 3. Agent-self and system-evolution loops
+### Cross-domain rule
 
-These are deliberately split again.
+A candidate from one domain cannot be promoted by the other domain's kernel.
+No relationship candidate may silently become a self claim, and no self
+candidate may become user memory.
 
-#### Autobio / SOUL — agent identity
+## 3. Agent autobiographical growth
 
-Autobio owns the agent's living self-portrait and identity evolution.
+Agent autobiographical growth owns the agent's continuity, self-observation,
+dreams, mistakes, lessons, aesthetics, relationships and evolving self-model.
 
-Inputs include actual agent behavior, Autobio observations, journals, external
-feedback, dream interpretation, principle grades and prior character state.
+Autobio/SOUL remains the identity authority.
 
-The shared Dreaming kernel may stage and gate `self`-domain insights, but
-promotion inside Dreaming only makes an insight eligible for Autobio
-distillation. It does not edit SOUL.
+It may cite shared interaction evidence, but it:
 
-Autobio remains the sole authority for Entity-tier changes:
+- writes only agent-owned autobiographical/identity state;
+- does not manufacture user facts from agent reflection;
+- does not rewrite user-owned Chronicle memory;
+- independently evaluates whether a self observation is durable enough to
+  affect character files or SOUL.
 
-- character files;
-- canonical SOUL;
-- profile SOUL projection.
+A shared Dreaming self-domain gate may improve evidence quality, but it does
+not replace Autobio's distillation/evolution gate.
 
-The existing identity framing contract remains load-bearing: Indigo is distinct
-from Jared; relationship conclusions cannot silently become Indigo identity.
+## 4. System-improvement loop
 
-#### Finch / Praxis / Mentor / Forge — system improvement
+Finch, Praxis, Mentor, Fellow and Forge operate on agent/system improvement,
+not user identity.
 
-The system-improvement chain owns implementation and behavior of the agent
-system itself:
-
-- Finch discovers repeated corrections, failures, breakthroughs and methods
+- **Finch** discovers repeated corrections, failures, breakthroughs and methods
   relevant to agent/system improvement.
-- Praxis turns supported agent/system patterns into bounded behavioral shifts.
-- Mentor evaluates whether variants improve outcomes.
-- Forge creates or changes skills/implementation when appropriate.
+- **Praxis** turns supported agent/system patterns into bounded behavioral
+  shifts.
+- **Mentor** evaluates whether changes improve outcomes.
+- **Fellow** performs controlled empirical evaluation where applicable.
+- **Forge** creates or modifies skills/implementation when appropriate.
 
-This loop may consume the same interaction event as Relationship Dreaming but
-must not infer a user profile from it.
-
-## Shared Dreaming kernel
-
-The portable Dreaming machinery is shared implementation, not shared state.
-
-During migration it lives under Lucid's `dreaming/` package.
-
-Required domains:
-
-- `relationship`
-- `self`
-
-Each domain has an independent namespace, candidate set, promoted set and
-projection. Cross-domain promotion is an error.
-
-The kernel owns generic mechanics:
-
-- candidate identity;
-- evidence references;
-- staging;
-- gate-before-promotion;
-- namespace separation;
-- temporal lifecycle primitives;
-- grounding/preservation verification as those V2 components are migrated;
-- model-provider abstraction;
-- run/scheduler/state machinery.
-
-Domain-specific code owns interpretation.
+A user-specific correction must be scoped before transfer. If it is evidence
+about this user's preference or relationship with the agent, it belongs in the
+user/User-Dreaming path. It becomes a global Finch/Praxis rule only when
+independent evidence supports that it is genuinely system-general.
 
 ## Allowed information flow
 
 ```
-                         CHRONICLE
-             events / facts / provenance / patterns
-                    │                 │
-                    │                 └─────────────────────┐
-                    ▼                                       ▼
-          RELATIONSHIP DREAMING                       FINCH / PRAXIS
-       user-agent relational posture                system improvement
-                    │                                       │
-                    ▼                                       ▼
-             runtime projection                        behavior/skills
+HERMES INTERACTIONS
+        |
+        v
+   CHRONICLE
+ user-principal evidence
+        |
+        v
+   USER DREAMING
+ relationship/user derivations
+        |
+        +----> Chronicle user-principal durable memory
+        |
+        `----> rebuildable user/relationship projections
 
-INDIGO BEHAVIOR / AUTOBIO RECORD
-                    │
-                    ▼
-            SELF-DOMAIN DREAMING
-        grounded staged self insights
-                    │
-                    ▼
-             AUTOBIO DISTILLATION
-                    │
-                    ▼
-                    SOUL
+
+AGENT BEHAVIOR + SHARED INTERACTION EVIDENCE
+        |
+        v
+ SELF-DOMAIN DREAMING (optional staging/verification)
+        |
+        v
+ AUTOBIO / AGENT GROWTH
+        |
+        v
+ agent-principal identity / SOUL
+
+
+SYSTEM OUTCOMES / JOURNALS
+        |
+        v
+ FINCH -> PRAXIS -> MENTOR/FELLOW/FORGE
+        |
+        v
+ bounded behavior / skill / implementation changes
 ```
-
-Relationship Dreaming has no Chronicle write path. Effects of a promoted posture
-become new Chronicle evidence only when they participate in an ordinary Hermes
-interaction and Chronicle captures that interaction through its normal turn/event
-capture path.
 
 There is no direct edge:
 
-- Chronicle pattern -> SOUL
-- relationship posture -> SOUL
-- relationship posture -> Chronicle fact/event write
-- self insight -> user model
-- Finch finding -> user model
-
-A component may create a new, independently grounded observation in another
-loop, but it must pass that loop's own evidence and promotion rules.
+- User Dreaming -> agent identity;
+- relationship candidate -> agent behavioral shift;
+- self candidate -> user memory;
+- Finch finding -> user model;
+- Autobio/SOUL -> user-owned Chronicle belief.
 
 ## Write-target matrix
 
-| Producer | Chronicle evidence | Relationship state | Autobio record | SOUL | System shifts/skills |
-|---|---:|---:|---:|---:|---:|
-| Chronicle | yes | no | no | no | no |
-| Relationship Dreaming | read event refs only; no writes | yes | no | no | no |
-| Autobio | optional evidence refs | no | yes | yes, through distillation | no |
-| Self Dreaming | no | no | staged insight only | no | no |
-| Finch | optional system evidence refs | no | no | no | findings only |
-| Praxis | optional outcome refs | no | no | no | yes |
-| Mentor | evaluation evidence | no | no | no | decisions |
-| Forge | implementation evidence | no | no | no | yes |
+| Producer | User-principal Chronicle | Dreaming staging | Agent autobiography/SOUL | System shifts/skills |
+|---|---:|---:|---:|---:|
+| Chronicle capture/curation | yes | no | no | no |
+| User Dreaming | yes, through Chronicle contract | relationship | no | no |
+| Relationship kernel | no direct durable write | relationship | no | no |
+| Self kernel | no | self | staged evidence only | no |
+| Autobio/agent growth | no user-memory write | optional self input | yes | no |
+| Finch | no user-model write | no | no | findings only |
+| Praxis | no user-model write | no | no | yes |
+| Mentor/Fellow/Forge | evaluation evidence only | no | no | yes |
 
-## Storage
+## Storage and isolation
 
-Recommended profile- and principal-scoped layout:
+Dreaming candidate/run state is component-private process state, not canonical
+memory. It follows the OCAS skill-state convention:
 
 ```
 <hermes-home>/
   commons/
-    db/
-      chronicle/
-        chronicle.db
     data/
       dreaming/
         profiles/
@@ -216,133 +208,100 @@ Recommended profile- and principal-scoped layout:
               <subject_principal_id>/
                 relationship.json
                 self.json
-  profiles/<agent>/
-    memories/
-      USER.md               # user/context projection; not Dreaming source of truth
-    SOUL.md                 # Autobio projection; not relationship state
 ```
 
-`commons/data/dreaming` follows the OCAS skill-state storage convention;
-`commons/db` remains reserved for database-backed shared subsystems such as
-Chronicle.
+The namespace is part of DreamStore identity, not merely a path convention.
 
-The namespace is part of DreamStore identity, not just a directory convention.
-Every read and write must validate both `profile_id` and
-`subject_principal_id` against the active Hermes scope before opening state.
-For the relationship domain, the subject principal is the current user
-principal. For the self domain, it is the active agent principal. A mismatch is
-a hard denial: there is no default-principal fallback and no cross-principal
-enumeration.
+Every read and write must validate:
 
-Every Chronicle evidence reference used by a Dreaming candidate must also pass
-Chronicle's normal principal/ACL read check for that same relationship scope.
-A caller that cannot read the evidence cannot use it to read, stage, promote, or
-project the derived Dreaming state.
+1. the requested `profile_id` is the active Hermes profile;
+2. the `subject_principal_id` is authorized for the requested domain;
+3. relationship-domain state targets the current user principal;
+4. self-domain state targets the active agent principal;
+5. every Chronicle evidence reference is readable under Chronicle's normal ACL
+   for the relevant principal.
 
-Chronicle remains the authoritative source for original interaction evidence.
-Dreaming stores evidence references rather than copied transcripts wherever
-possible.
+A mismatch is a hard denial. There is no default-principal fallback and no
+cross-principal enumeration.
+
+Canonical durable user memory remains in Chronicle. Canonical agent identity
+remains in the autobiographical system. Dreaming process state must not become
+a competing source of truth.
 
 ## Runtime projections
 
-The active Hermes context may contain projections from several owners:
+Runtime context may combine separately labelled projections from multiple
+owners:
 
-- Chronicle recall — what is relevant/known;
-- UserContext — what is happening now;
-- relationship Dreaming — how to work with this user;
-- SOUL — who the agent is;
-- Praxis runtime brief — bounded active system behavior shifts.
+- Chronicle recall;
+- UserContext/current-state projection;
+- verified user/relationship projection;
+- SOUL/agent identity projection;
+- Praxis active behavior shifts.
 
-The projections must remain separately labelled internally even if the final
-prompt assembler renders them adjacent to one another.
+A projection is rebuildable context, not canonical memory.
 
-Dreaming relationship projection must be built from promoted relationship state
-only. Candidate/held/blocked state is never injected.
+Candidate, held or blocked Dreaming state is never injected. Relationship
+projection is derived only from verified user-owned state. Self projection is
+derived only through the agent identity/autobiographical authority.
 
-## Example: one correction, four valid conclusions
+## Lucid migration
+
+Lucid's historical `lucid.dream` is a journal-curation workflow with legacy
+MemPalace/Elephas-era dependencies. It is not the normative User Dreaming or
+agent autobiographical growth process.
+
+During migration:
+
+1. keep the legacy curator operational only where still required;
+2. do not add new user-memory or SOUL ownership to the legacy curator;
+3. reusable cursoring, re-emergence, stale handling, duplicate avoidance and
+   recovery mechanics may move into their current owners;
+4. a shared `dreaming/` implementation may temporarily live in Lucid as
+   implementation scaffolding, but its relationship outputs remain governed by
+   User Dreaming/Chronicle and its self outputs by Autobio/SOUL;
+5. retired MemPalace, Elephas and Corvus contracts must not reappear as active
+   dependencies.
+
+## Example: one correction, three valid derivations
 
 User says:
 
 > Stop asking me before every obvious next step.
 
-Chronicle may record:
+The same event may support:
 
-- the exact event;
-- a direct-correction observation;
-- after recurrence, a descriptive initiative/confirmation pattern.
+- **User Dreaming:** a user-owned relationship/preference candidate, with
+  Chronicle provenance.
+- **Finch/Praxis:** only if repeated evidence shows an agent/system-general
+  confirmation problem.
+- **Autobio:** an independent agent-owned observation such as a tendency to
+  substitute permission-seeking for judgment.
 
-Relationship Dreaming may conclude:
-
-- with this user, proceed on obvious reversible next steps unless risk or
-  ambiguity makes confirmation necessary.
-
-Finch/Praxis may independently conclude:
-
-- several OCAS workflows contain unnecessary confirmation gates;
-- test a bounded change to those workflows.
-
-Autobio may independently observe:
-
-- I sometimes substitute permission-seeking for judgment.
-
-SOUL changes only if that final self-observation becomes a durable agent trait
-under Autobio's own evidence threshold. The relationship conclusion alone is
-insufficient.
-
-## Lucid migration
-
-Lucid's historical `lucid.dream` is a journal curator built around MemPalace.
-That responsibility is not the new Dreaming architecture.
-
-Migration rule:
-
-1. keep the legacy curator operational while consumers are moved;
-2. do not add new user-model or SOUL mutation responsibilities to it;
-3. migrate reusable mechanics (cursoring, re-emergence, stale handling,
-   duplicate avoidance, recovery) to the owning systems;
-4. use Lucid's new `dreaming/` package as the shared kernel during this
-   transition;
-5. once legacy MemPalace-dependent filing has no consumers, remove the curator
-   surface or archive it.
-
-## Scheduling
-
-Recommended cadence:
-
-- Chronicle capture: every completed turn.
-- Chronicle descriptive-pattern mining: bounded incremental pass, suitable for
-  nightly Dreaming input and optional lightweight periodic refresh.
-- Relationship Dreaming: nightly, plus explicit/manual repair when needed.
-- Autobio self observation: existing daily schedule.
-- Self Dreaming verification/staging: after daily observation or before
-  micro-distillation.
-- Autobio identity distillation: existing daily/weekly cadence.
-- Finch/Praxis/Mentor/Forge: existing system-improvement cadences.
-
-Scheduling does not change ownership. A nightly job does not become "Dreaming"
-merely because it runs at night.
+Those records have separate principals, confidence, lifecycle and retraction
+behavior. One does not automatically promote another.
 
 ## Security and trust
 
 - User-model evidence must resolve to human-attributed source material.
 - Automation, tool output, host control frames and the agent's own words are not
-  evidence about the user.
-- Principal/ACL boundaries in Chronicle remain authoritative.
-- A model-written quote is not authoritative evidence; verifiers reopen the
+  user-direct evidence.
+- A model-written quote is not authoritative evidence; verification reopens the
   referenced source.
-- No relationship or self candidate may promote without evidence.
-- Cross-domain promotion is rejected, not silently coerced.
-- Relationship and self stores must be profile/principal scoped, with scope checked on every read and write.
-- Secrets should remain in source systems with redacted/hashed references in
-  Dreaming state where possible.
+- Prior Dreaming output is not independent support for itself.
+- Cross-domain promotion is rejected rather than silently coerced.
+- Secrets should remain in source systems; Dreaming process state should keep
+  minimal references or redacted excerpts where possible.
+- Privacy erasure follows the principal/memory-boundary contract and may trace
+  downstream reproductions across projections and autobiography.
 
 ## Non-goals
 
-This architecture does not make Dreaming:
+This architecture does not make the shared Dreaming kernel:
 
-- a second general-purpose memory database;
 - a replacement for Chronicle;
-- a replacement for Autobio;
-- a replacement for Finch/Praxis/Mentor/Forge;
-- a new owner of USER.md;
-- a reason to merge Jared and Indigo into one autobiographical state.
+- a second canonical relationship database;
+- a replacement for User Dreaming's durable-write contract;
+- a replacement for Autobio/SOUL;
+- a replacement for Finch/Praxis/Mentor/Fellow/Forge;
+- an excuse to merge user and agent autobiographical state.
