@@ -20,6 +20,7 @@ The canonical component lifecycle registry is components.json.
 - spec-ocas-component-registry.md — component lifecycle and drift semantics
 - spec-ocas-principals-and-memory-boundaries.md — user/agent ownership, correction, retraction and privacy erasure
 - spec-ocas-user-dreaming.md — user-only offline consolidation
+- spec-ocas-dreaming.md — cross-domain boundary map for user Dreaming, agent growth and system improvement
 - spec-ocas-runtime-contracts.md — capabilities, credentials, task contracts, provenance, artifact gates and introspection
 - spec-ocas-interfaces.md — typed cross-component communication
 - spec-ocas-storage-conventions.md — private state, journals, queues, exports and runtime-owned storage
