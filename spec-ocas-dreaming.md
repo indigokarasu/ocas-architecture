@@ -87,7 +87,7 @@ Autobio owns the agent's living self-portrait and identity evolution.
 Inputs include actual agent behavior, Autobio observations, journals, external
 feedback, dream interpretation, principle grades and prior character state.
 
-The shared Dreaming kernel may stage and verify `self`-domain insights, but
+The shared Dreaming kernel may stage and gate `self`-domain insights, but
 promotion inside Dreaming only makes an insight eligible for Autobio
 distillation. It does not edit SOUL.
 
@@ -155,11 +155,6 @@ Domain-specific code owns interpretation.
                     │                                       │
                     ▼                                       ▼
              runtime projection                        behavior/skills
-                    │
-                    └──────────────┐
-                                   │ interaction outcomes
-                                   ▼
-                              CHRONICLE
 
 INDIGO BEHAVIOR / AUTOBIO RECORD
                     │
@@ -174,11 +169,16 @@ INDIGO BEHAVIOR / AUTOBIO RECORD
                     SOUL
 ```
 
+Relationship Dreaming has no Chronicle write path. Effects of a promoted posture
+become new Chronicle evidence only when they participate in an ordinary Hermes
+interaction and Chronicle captures that interaction through its normal turn/event
+capture path.
+
 There is no direct edge:
 
 - Chronicle pattern -> SOUL
 - relationship posture -> SOUL
-- relationship posture -> Chronicle fact
+- relationship posture -> Chronicle fact/event write
 - self insight -> user model
 - Finch finding -> user model
 
@@ -190,7 +190,7 @@ loop, but it must pass that loop's own evidence and promotion rules.
 | Producer | Chronicle evidence | Relationship state | Autobio record | SOUL | System shifts/skills |
 |---|---:|---:|---:|---:|---:|
 | Chronicle | yes | no | no | no | no |
-| Relationship Dreaming | outcome/event refs only | yes | no | no | no |
+| Relationship Dreaming | read event refs only; no writes | yes | no | no | no |
 | Autobio | optional evidence refs | no | yes | yes, through distillation | no |
 | Self Dreaming | no | no | staged insight only | no | no |
 | Finch | optional system evidence refs | no | no | no | findings only |
@@ -200,7 +200,7 @@ loop, but it must pass that loop's own evidence and promotion rules.
 
 ## Storage
 
-Recommended profile-scoped layout:
+Recommended profile- and principal-scoped layout:
 
 ```
 <hermes-home>/
@@ -208,14 +208,36 @@ Recommended profile-scoped layout:
     db/
       chronicle/
         chronicle.db
+    data/
       dreaming/
-        relationship.json   # or future SQLite namespace
-        self.json
+        profiles/
+          <profile_id>/
+            principals/
+              <subject_principal_id>/
+                relationship.json
+                self.json
   profiles/<agent>/
     memories/
       USER.md               # user/context projection; not Dreaming source of truth
     SOUL.md                 # Autobio projection; not relationship state
 ```
+
+`commons/data/dreaming` follows the OCAS skill-state storage convention;
+`commons/db` remains reserved for database-backed shared subsystems such as
+Chronicle.
+
+The namespace is part of DreamStore identity, not just a directory convention.
+Every read and write must validate both `profile_id` and
+`subject_principal_id` against the active Hermes scope before opening state.
+For the relationship domain, the subject principal is the current user
+principal. For the self domain, it is the active agent principal. A mismatch is
+a hard denial: there is no default-principal fallback and no cross-principal
+enumeration.
+
+Every Chronicle evidence reference used by a Dreaming candidate must also pass
+Chronicle's normal principal/ACL read check for that same relationship scope.
+A caller that cannot read the evidence cannot use it to read, stage, promote, or
+project the derived Dreaming state.
 
 Chronicle remains the authoritative source for original interaction evidence.
 Dreaming stores evidence references rather than copied transcripts wherever
@@ -310,7 +332,7 @@ merely because it runs at night.
   referenced source.
 - No relationship or self candidate may promote without evidence.
 - Cross-domain promotion is rejected, not silently coerced.
-- Relationship and self stores must be profile/principal scoped.
+- Relationship and self stores must be profile/principal scoped, with scope checked on every read and write.
 - Secrets should remain in source systems with redacted/hashed references in
   Dreaming state where possible.
 
