@@ -63,11 +63,10 @@
       "id": "ocas-lucid",
       "type": "skill",
       "layer": "memory",
-      "status": "transitional",
+      "status": "active",
       "visibility": "public",
       "repository": "indigokarasu/lucid",
-      "responsibility": "Nightly journal curation.",
-      "migration_obligation": "Remove legacy memory-provider and retired-component contracts; make durable filing principal-scoped."
+      "responsibility": "Nightly journal curation."
     },
     {
       "id": "ocas-finch",
@@ -271,10 +270,9 @@
       "id": "ocas-bower",
       "type": "skill",
       "layer": "operations",
-      "status": "transitional",
+      "status": "active",
       "visibility": "public",
-      "repository": "indigokarasu/bower",
-      "migration_obligation": "Remove legacy memory-provider ingestion references."
+      "repository": "indigokarasu/bower"
     },
     {
       "id": "ocas-skilllab",
