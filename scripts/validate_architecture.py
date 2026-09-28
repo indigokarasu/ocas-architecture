@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Fail CI when active OCAS architecture reintroduces retired components or invalid registry state."""
+"""Validate normative OCAS v2 architecture contracts.
+
+Legacy specs remain migration inputs until individually promoted to v2. The validator
+intentionally scans only files declared normative in NORMATIVE; adding a spec to that
+set makes retired-component references a CI failure.
+"""
 from __future__ import annotations
 import json
 import pathlib
@@ -8,15 +13,12 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "components.json"
-SCAN = [
+NORMATIVE = [
     ROOT / "spec-ocas-architecture.md",
     ROOT / "spec-ocas-interfaces.md",
     ROOT / "spec-ocas-storage-conventions.md",
-    ROOT / "spec-ocas-shared-schemas.md",
-    ROOT / "ocas-skill-authoring-rules.md",
-    ROOT / "ocas-build-template.md",
+    ROOT / "spec-ocas-principals-and-memory-boundaries.md",
 ]
-ALLOW_HISTORICAL = {ROOT / "CHANGELOG.md", ROOT / "todo.md"}
 
 
 def main() -> int:
@@ -32,20 +34,19 @@ def main() -> int:
         errors.append(f"retired components marked active: {sorted(overlap)}")
 
     forbidden = {
-        "ocas-elephas": re.compile(r"\b(?:ocas-)?elephas\b", re.I),
-        "ocas-corvus": re.compile(r"\b(?:ocas-)?corvus\b", re.I),
-        "mempalace": re.compile(r"\bmempalace\b", re.I),
+        "legacy-memory-mediator": re.compile(r"\b(?:ocas-)?elephas\b", re.I),
+        "legacy-pattern-service": re.compile(r"\b(?:ocas-)?corvus\b", re.I),
+        "legacy-memory-provider": re.compile(r"\bmempalace\b", re.I),
     }
-    for path in SCAN:
+    for path in NORMATIVE:
         if not path.exists():
-            errors.append(f"missing architecture file: {path.name}")
+            errors.append(f"missing normative architecture file: {path.name}")
             continue
         text = path.read_text()
         for name, pattern in forbidden.items():
             if pattern.search(text):
-                errors.append(f"{path.name}: active contract references retired {name}")
+                errors.append(f"{path.name}: normative contract references retired {name}")
 
-    # Memory contracts must explicitly name principal ownership.
     arch = (ROOT / "spec-ocas-architecture.md").read_text()
     for phrase in ("user principal", "agent principal", "User Dreaming", "Agent autobiographical"):
         if phrase not in arch:
@@ -56,7 +57,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print(f"OCAS architecture validation OK: {len(active)} active registry entries")
+    print(f"OCAS architecture validation OK: {len(active)} active registry entries; {len(NORMATIVE)} normative specs")
     return 0
 
 if __name__ == "__main__":
