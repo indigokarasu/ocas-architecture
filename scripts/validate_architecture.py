@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Validate normative OCAS v2 architecture contracts.
-
-Legacy specs remain migration inputs until individually promoted to v2. The validator
-intentionally scans only files declared normative in NORMATIVE; adding a spec to that
-set makes retired-component references a CI failure.
-"""
+"""Validate normative OCAS v2 architecture contracts."""
 from __future__ import annotations
 import json
 import pathlib
@@ -18,6 +13,7 @@ NORMATIVE = [
     ROOT / "spec-ocas-interfaces.md",
     ROOT / "spec-ocas-storage-conventions.md",
     ROOT / "spec-ocas-principals-and-memory-boundaries.md",
+    ROOT / "spec-ocas-shared-schemas.md",
 ]
 
 
