@@ -18,4 +18,4 @@ MIT License — see `LICENSE` for details.
 
 ## Dreaming and learning
 
-- `spec-ocas-dreaming.md` — ownership and information-flow contract for Chronicle user evidence, relationship Dreaming, Autobio/SOUL self-evolution, and Finch/Praxis/Mentor/Forge system improvement.
+- [spec-ocas-dreaming.md](spec-ocas-dreaming.md) — ownership and information-flow contract for Chronicle user evidence, relationship Dreaming, Autobio/SOUL self-evolution, and Finch/Praxis/Mentor/Forge system improvement.
