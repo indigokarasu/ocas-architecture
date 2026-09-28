@@ -1,425 +1,174 @@
 # OCAS Journals & Evaluation Specification
 
-Spec Version: 1.2.3
-Versioning Policy: Minor version increments only. Major versions avoided to maintain compatibility.
+Spec Version: 2.0.0
+Author: Indigo Karasu
+Status: normative
 
-Changes from 1.2: canonicalized this file's own name to spec-ocas-journal.md (was inconsistently referenced as spec-ocas-Journals.md in some skill specs -- use spec-ocas-journal.md everywhere); added journal directory path (`{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`); added Thread to Observation Journal consumers; added Elephas and Weave to journal emitters; added journal path to section 3; clarified champion/challenger directory structure.
+## Purpose
 
----
+Journals are immutable run evidence used for traceability, evaluation, recovery, and optional downstream curation.
 
-## 1. Naming Convention
+A journal is not automatically durable personal memory.
 
-Skill identifiers must use hyphenated names to avoid namespace conflicts.
+## Journal types
 
-Examples:
-- `ocas-scout`
-- `ocas-rally`
-- `ocas-taste`
-- `ocas-mentor`
-- `ocas-forge`
+### Observation
 
-Variant naming: `ocas-rally-variant-20260307`
+No external side effect occurred. Typical uses: analysis, discovery, monitoring, and local classification.
 
-Dots must not be used because some runtimes interpret them as hierarchy separators.
+### Action
 
----
+At least one external or durable side effect occurred or was attempted.
 
-## 2. Journal System Overview
+### Research
 
-The journal system provides three capabilities:
+Structured multi-source research with source/provenance tracking.
 
-1. **Traceability** — every run can be reconstructed
-2. **Comparability** — champion and challenger runs can be paired
-3. **Optimization** — Mentor can evaluate runs against OKRs
+A component chooses the type that best describes the run contract. A single invocation MAY emit multiple journals when phases have materially different semantics.
 
-Journals are append-only structured telemetry bundles produced by every skill run. Journals are immutable and never edited after completion.
+## Path
 
-Conceptual model per journal entry:
-- run_identity
-- runtime
-- input
-- decision
-- action
-- artifacts
-- metrics
-- okr_evaluation
+~~~text
+{agent_root}/commons/journals/{component-id}/YYYY-MM-DD/{run_id}.json
+~~~
 
----
+Completed journals are immutable and written atomically.
 
-## 2.1 Journal Types
+## Run identity
 
-Three formal artifact classes:
+Every journal includes:
 
-### Observation Journal
+- run_id;
+- comparison_group_id when paired for evaluation;
+- role: normal, champion, or challenger;
+- component_id;
+- component_version;
+- journal_spec_version;
+- journal_type;
+- timestamp_start;
+- timestamp_end;
+- normalized_input_hash;
+- principal_id when principal-scoped;
+- correlation_id and causation_id when part of larger work.
 
-Purpose: Record signals discovered by the system. No external side effects.
+See JournalEntry in spec-ocas-shared-schemas.md.
 
-Used by: Corvus, Sift, Scout, Look, Weave (read/query runs), Taste, Rally (research phase), Thread, Relay
+## Runtime telemetry
 
-Example:
-```yaml
-observation_journal:
-  source: sift
-  entities_detected:
-    - LadybugDB
-    - graph database
-  confidence: medium
-```
+Capture enough runtime identity to reproduce or interpret evaluation:
 
-### Action Journal
+- model/runtime id when material;
+- host/runtime version;
+- capability/tool-set version when material;
+- active profile/principal;
+- environment fingerprint for controlled experiments.
 
-Purpose: Record actions executed by the system. External side effects occurred.
+Never log credentials or secret values.
 
-Used by: Praxis, Dispatch, Voyage, Rally (execution phase), Mentor, Vesper, Forge, Elephas, Weave (sync/writeback runs), Fellow
+## Decision record
 
-Example:
-```yaml
-action_journal:
-  action: reservation_booked
-  place: natuRe Waikiki
-  time: 7:30pm
-```
+The journal records what the component decided or produced and the evidence refs supporting that decision.
 
-### Research Journal
+Reasoning summaries are concise, user/audit-safe summaries, not hidden chain-of-thought.
 
-Purpose: Record research sessions and sources.
+## Actions and side effects
 
-Used by: Sift, Scout
+Action journals record each attempted side effect with:
 
-Example:
-```yaml
-research_journal:
-  query: embedded graph database
-  sources:
-    - ladybugdb.com
-    - neo4j.com
-  entities:
-    - LadybugDB
-    - Neo4j
-```
+- operation;
+- target class;
+- action fingerprint where applicable;
+- approval reference/fingerprint when required;
+- result;
+- postcondition verification result.
 
-Elephas ingests all journal types into Chronicle. Mentor reads all journal types for evaluation.
+A successful tool/process return is not sufficient proof that the intended state changed.
 
----
+## Memory candidates
 
-## 3. Journal Directory Structure
+A journal MAY carry Signal, DerivedClaim, or memory-candidate payloads.
 
-All journals are written to the central journal root. Skills do not store journals inside their data directories or skill packages.
+Rules:
 
-```
-{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
-```
-
-Example standard run:
-```
-{agent_root}/commons/journals/ocas-scout/
-  2026-03-17/
-    r_91d28e1.json
-    r_a7f2c1.json
-```
+- target/owner principal is mandatory for any durable-memory proposal;
+- user-memory candidates preserve user-grounded evidence;
+- agent/tool/system text is not silently promoted to user-direct evidence;
+- agent-owned observations remain agent-owned;
+- candidates remain proposals until accepted by Chronicle.
 
-Example champion/challenger pair:
-```
-{agent_root}/commons/journals/ocas-rally/
-  2026-03-07/
-    cg_5cfa2c1/
-      champion.json
-      challenger.json
-```
+## Artifacts
 
----
+Artifact-producing runs record:
 
-## 4. Pairing Champion and Challenger Runs
-
-Champion and challenger runs are paired through a shared `comparison_group_id` generated before execution begins.
-
-```
-comparison_group_id
-  champion run_id
-  challenger run_id
-```
+- artifact id/ref;
+- input fingerprint;
+- final artifact hash;
+- structural/render verification where applicable;
+- semantic-review fingerprint where applicable.
 
-Neither run needs awareness of the other. Each writes its own journal using the same group identifier. Both files land in the same date directory.
+## Champion/challenger evaluation
 
----
-
-## 5. Run Identity Block
+Champion and challenger runs share comparison_group_id and normalized input.
 
-Every journal entry begins with run identity.
+Challengers MUST NOT execute real external side effects unless an explicitly isolated/simulated environment permits them.
 
-```yaml
-run_identity:
-  comparison_group_id: cg_5cfa2c1
-  run_id: r_91d28e1
-  role: champion        # champion | challenger
-  skill_name: ocas-rally
-  skill_version: 1.3.2
-  variant_parent: 1.3.2
-  timestamp_start: 2026-03-07T22:13:01Z
-  timestamp_end: 2026-03-07T22:13:05Z
-  normalized_input_hash: sha256:...
-  journal_spec_version: "1.3"
-  journal_type: observation   # observation | action | research
-```
-
-Required fields: `comparison_group_id`, `run_id`, `role`, `skill_name`, `skill_version`, `timestamp_start`, `timestamp_end`, `normalized_input_hash`, `journal_spec_version`, `journal_type`.
+Promotion evidence binds to exact fingerprints for:
 
----
-
-## 6. Runtime Telemetry
-
-```yaml
-runtime:
-  model: claude-sonnet-4-6
-  provider: anthropic
-  temperature: 0.2
-  context_window: 200k
-  node: macstudio-01
-  oc_version: 2026.1.30
-```
-
-Capturing model information enables skill-to-model pairing analysis over time.
+- target/champion;
+- challenger;
+- benchmark;
+- runner;
+- environment;
+- reviewed artifact when applicable.
 
----
-
-## 7. Input Record
+Changing one of those fingerprints invalidates stale promotion evidence.
 
-Inputs must be normalized so champion and challenger runs use identical data.
+## Universal evaluation dimensions
 
-```yaml
-input:
-  normalized_input_hash: sha256:...
-  input_schema_version: "1.0"
-  context_tokens: 4820
-  command: scout.research.start
-```
+Evaluation systems may track:
 
----
+- completion/postcondition success;
+- correctness/quality;
+- latency/cost;
+- recovery behavior;
+- schema conformance;
+- capability/approval violations;
+- principal-boundary violations;
+- artifact verification failures.
 
-## 8. Decision Record
+Domain components add their own OKRs.
 
-All runs record decisions. Variants record decisions but must never execute side effects.
+## Consumers
 
-```yaml
-decision:
-  decision_type: research_completed
-  payload:
-    subject: Jane Doe
-    tiers_used: [1, 2]
-    findings_count: 12
-  confidence: 0.85
-  reasoning_summary: Sufficient Tier 1 and 2 coverage for stated goal.
-```
+Evaluation and curation systems may read journals.
 
----
+Consumers maintain their own cursors and MUST NOT edit producer journals.
 
-## 9. Action Record
+A journal consumer that proposes durable memory uses the Chronicle contract and explicit target principal.
 
-Champion runs may execute actions. Variants must not.
+## Privacy and minimization
 
-Champion:
-```yaml
-action:
-  side_effect_intent: execute_trade
-  side_effect_executed: true
-  external_reference: broker_order_id_abc123
-```
+Do not journal:
 
-Variant (challenger):
-```yaml
-action:
-  side_effect_intent: execute_trade
-  side_effect_executed: false
-  reason: shadow_run
-```
+- passwords, tokens, API keys;
+- unnecessary raw personal content;
+- raw private browsing history when a bounded derived signal suffices;
+- large duplicated tool output when a stable source/artifact reference is enough.
 
----
+## Recovery relationship
 
-## 10. Artifact Manifest
+Every scheduled or side-effecting run also emits ExecutionEvidence under spec-ocas-recovery.md.
 
-```yaml
-artifacts:
-  - research.md
-  - analysis.json
-```
+A supposedly complete run without its required journal/evidence is a verification failure.
 
----
+## Validation
 
-## 11. Metrics Snapshot
+A journal validator checks:
 
-```yaml
-metrics:
-  latency_ms: 412
-  retry_count: 0
-  validation_failures: 0
-  context_tokens_used: 5300
-  records_written: 3
-  records_skipped: 0
-  records_failed: 0
-```
-
----
-
-## 12. OKR Evaluation Block
-
-```yaml
-okr_evaluation:
-  success_rate: 1.0
-  latency_score: 0.74
-  reliability_score: 0.92
-  # skill-specific OKRs below, null if not applicable
-  verified_claim_ratio: 0.83
-  entity_resolution_accuracy: 0.95
-```
-
----
-
-## 13. Universal OKRs (Required for All Skills)
-
-All skills implement these operational OKRs.
-
-**Reliability**
-- `success_rate` ≥ 0.95
-- `retry_rate` ≤ 0.10
-
-**Validation Integrity**
-- `validation_failure_rate` ≤ 0.05
-
-**Efficiency**
-- `latency` trending downward
-- `repair_events` ≤ 0.05
-
-**Context Stability**
-- `context_utilization` ≤ 0.70
-
-**Observability**
-- `journal_completeness` = 1.0
-
-Runs missing journals are invalid.
-
----
-
-## 14. Skill-Specific OKRs
-
-```yaml
-skill_okrs:
-  - name: decision_accuracy
-    metric: decision_accuracy
-    direction: maximize
-    target: 0.60
-    evaluation_window: 30_runs
-```
-
----
-
-## 15. Example Skill OKRs
-
-**ocas-rally**
-- `decision_accuracy` ≥ 0.60
-- `risk_adjusted_return` ≥ benchmark
-- `max_drawdown` ≤ 0.10
-
-**ocas-scout**
-- `verified_claim_ratio` ≥ 0.70
-- `entity_resolution_accuracy` ≥ 0.90
-- `source_diversity` ≥ 6
-
-**ocas-elephas**
-- `promotion_precision` ≥ 0.90
-- `identity_merge_accuracy` ≥ 0.95
-- `candidate_queue_age` ≤ 24 hours
-- `ingestion_coverage` ≥ 0.99
-
-**ocas-weave**
-- `person_record_completeness` ≥ 0.80
-- `sync_success_rate` ≥ 0.90
-- `import_skip_rate` ≤ 0.05
-
----
-
-## 16. Good OKR Design Principles
-
-**Observable** — measurable automatically from journal data.
-**Stable** — evaluated over rolling windows (e.g., 30 runs).
-**Outcome-Oriented** — reflects real-world task success, not process steps.
-
-Bad: `number_of_steps`
-Good: `decision_accuracy`
-
----
-
-## 17. Engineering Safeguards
-
-- `comparison_group_id` must be generated before execution begins
-- `normalized_input_hash` must match for both champion and challenger runs
-- Journal files must be written atomically (write to `.tmp`, then rename)
-- Journal files are append-only and never edited after write
-- Malformed journals are quarantined by Mentor, not trusted
-
----
-
-## 18. JSON Schema Validation
-
-All journals conform to a shared JSON schema so Mentor and Forge can reliably parse them.
-
-Validation workflow:
-1. Skill finishes execution
-2. Journal entry generated
-3. Schema validator runs
-4. If validation fails, run is marked invalid
-
-Minimum required schema:
-```json
-{
-  "type": "object",
-  "required": ["run_identity", "runtime", "input", "decision", "metrics"],
-  "properties": {
-    "run_identity": {"type": "object"},
-    "runtime": {"type": "object"},
-    "input": {"type": "object"},
-    "decision": {"type": "object"},
-    "action": {"type": "object"},
-    "metrics": {"type": "object"},
-    "okr_evaluation": {"type": "object"}
-  }
-}
-```
-
-Forge enforces schema compliance when building new skills. Mentor quarantines journal entries that fail schema validation.
-
----
-
-## 19. Spec Versioning Rules
-
-Minor version increments only. Backward compatibility preserved between minor versions.
-
-Skills include the spec version they implement:
-```yaml
-journal_spec_version: "1.3"
-```
-
-The canonical filename for this spec is `spec-ocas-journal.md`. All skill packages and build specs must reference this exact filename.
-
----
-
-## 20. System Invariant
-
-Every champion run must:
-- generate a `comparison_group_id`
-- write a journal entry to `{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json`
-- spawn a variant run if one exists
-- ensure variants never execute side effects
-
----
-
-## 21. System Model
-
-```
-skills execute tasks
-journals capture telemetry → {agent_root}/commons/journals/
-mentor reads journals for evaluation
-elephas reads journals for knowledge ingestion
-forge builds variants from mentor proposals
-```
-
-Journals are the evaluation and knowledge substrate for the OCAS ecosystem.
+- valid JournalEntry shape/version;
+- timestamps and run id;
+- principal_id when memory-related;
+- no obvious secrets;
+- postcondition result for declared side effects;
+- challenger side-effect restrictions;
+- fingerprint completeness when used for promotion.
