@@ -1,504 +1,235 @@
 # OCAS Shared Schemas
 
-Spec Version: 1.2.0
+Spec Version: 2.0.0  
 Author: Indigo Karasu
 
-Changes from 1.1.4: added MCPDiscoveryRecord schema (Scout domain extension, introduced in scout v3.0.0); added PersonToolRecord schema (Scout domain extension, introduced in scout v3.0.0).
+These are logical schemas. Implementations may add domain fields but MUST preserve the ownership, provenance, idempotency and correlation semantics below.
 
-Changes from 1.2: added PortfolioOutcomeRecord schema (Rally domain extension); added ConsumptionSignal and ItemRecord schemas (Taste domain extensions); added EvaluationResult schema (Mentor domain extension).
-
-Changes from 1.0: updated JournalEntry minimum fields to match journal spec v1.3 (added journal_type, journal_spec_version); updated ConfigBase to reference central storage path; added InsightProposal schema (Corvus output); added BehavioralSignal schema (Corvus→Praxis); added VariantProposal and VariantDecision schemas (Mentor→Forge); clarified extension rules.
-
----
-
-## Purpose
-
-This document defines canonical schemas for data objects that appear across multiple OCAS skills. Skills reference these definitions rather than redefining them independently.
-
-Skills may extend these schemas with domain-specific fields. Base fields defined here must be present and semantically consistent.
-
----
-
-## DecisionRecord
-
-Used by: all skills that make consequential decisions.
-
-Every decision that changes behavior, triggers an external action, or produces an interpretive output should be recorded as a DecisionRecord.
+## InterfaceEnvelope
 
 ```json
 {
-  "decision_id": "string — unique identifier (dec_{hash})",
-  "timestamp": "string — ISO 8601",
-  "skill_id": "string — which skill made the decision",
-  "skill_version": "string",
-  "decision_type": "string — skill-defined category (e.g., route, execute, promote, ingest, safety)",
-  "description": "string — brief human-readable summary",
-  "evidence_refs": ["string — references to signals, sources, or artifacts that informed the decision"],
-  "outcome": "string — what was decided",
-  "confidence": "string — high|med|low",
-  "side_effects": "string|null — description of any external effects"
+  "message_id": "msg_<id>",
+  "message_type": "string",
+  "schema_version": "1.0",
+  "producer_id": "string",
+  "producer_version": "string",
+  "created_at": "ISO-8601",
+  "expires_at": null,
+  "idempotency_key": "string",
+  "correlation_id": "corr_<id>",
+  "causation_id": null,
+  "target_principal": null,
+  "provenance_refs": [],
+  "payload": {}
 }
 ```
 
----
+`target_principal` is required whenever processing can create/mutate durable memory or identity.
+
+## ProvenanceRef
+
+```json
+{
+  "ref_id": "prov_<id>",
+  "source_type": "interaction|journal|memory|artifact|external_source|event",
+  "source_id": "string",
+  "source_principal": "string|null",
+  "source_actor": "user|agent|system|external|null",
+  "observed_at": "ISO-8601|null",
+  "content_hash": "sha256:<hex>|null"
+}
+```
+
+## DerivedClaim
+
+```json
+{
+  "claim_id": "claim_<id>",
+  "owner_principal": "string",
+  "claim_type": "fact|episode|preference|interest|relationship|lesson|identity|other",
+  "claim_state": "user_stated|observed|inferred|predicted|planned|ongoing|completed|reported|verified|disputed|retracted",
+  "content": {},
+  "confidence": 0.0,
+  "provenance_refs": ["prov_<id>"],
+  "derivation": {
+    "type": "direct|user_dream|agent_reflection|research|other",
+    "run_id": "run_<id>",
+    "version": "string"
+  },
+  "created_at": "ISO-8601",
+  "supersedes": null
+}
+```
+
+Rules:
+
+- agent interpretation about a user is `inferred`, never `user_stated`;
+- repeated transformations of identical provenance do not increase evidence count;
+- `owner_principal` is immutable; changing ownership creates a new record with explicit provenance.
 
 ## Signal
 
-Used by: skills that emit observations to be ingested by Elephas.
-
-See `spec-ocas-ontology.md` for the full evidence model and signal delivery mechanism.
-
 ```json
 {
-  "signal_id": "string — unique identifier (sig_{hash})",
-  "timestamp": "string — ISO 8601",
-  "source_skill": "string — skill that emitted the signal",
-  "source_journal_type": "string — Observation|Action|Research",
-  "payload": {
-    "type": "string — entity type or signal category",
-    "data": "object — the observed information"
-  },
-  "confidence": "string — high|med|low",
-  "status": "string — active|consumed"
+  "signal_id": "sig_<id>",
+  "timestamp": "ISO-8601",
+  "source_component": "string",
+  "target_principal": "string|null",
+  "signal_type": "string",
+  "payload": {},
+  "confidence": "high|med|low|null",
+  "provenance_refs": [],
+  "correlation_id": "corr_<id>|null"
 }
 ```
 
----
+Signals are observations/proposals. A Signal is not durable personal memory merely because it exists.
 
-## Candidate
-
-Used by: skills that propose new facts for Chronicle.
+## DecisionRecord
 
 ```json
 {
-  "candidate_id": "string — unique identifier",
-  "timestamp": "string — ISO 8601",
-  "source_skill": "string",
-  "proposed_node": {
-    "type": "string — Entity|Place|Concept|Thing or subclass",
-    "data": "object — the proposed record"
-  },
-  "supporting_signals": ["string — signal_ids"],
-  "confidence": "string — high|med|low",
-  "status": "string — pending|confirmed|rejected|merged"
+  "decision_id": "dec_<id>",
+  "timestamp": "ISO-8601",
+  "component_id": "string",
+  "decision_type": "string",
+  "decision": "string",
+  "reason": "string",
+  "evidence_refs": [],
+  "correlation_id": "corr_<id>|null",
+  "action_fingerprint": "sha256:<hex>|null"
 }
 ```
 
----
-
-## InsightProposal
-
-Used by: Corvus (output), Vesper (input), Praxis (input for behavioral signals).
+## DurableIntent
 
 ```json
 {
-  "proposal_id": "string — unique identifier",
-  "proposal_type": "string — routine_prediction|thread_continuation|opportunity_discovery|anomaly_alert|behavioral_signal",
-  "description": "string — human-readable description of the insight",
-  "confidence_score": "number — 0.0 to 1.0",
-  "supporting_entities": ["string — entity or node IDs from Chronicle or Weave"],
-  "supporting_relationships": ["string — relationship IDs"],
-  "predicted_outcome": "string|null",
-  "suggested_follow_up": "string|null",
-  "target_skill": "string|null — for behavioral_signal type, the skill this proposal is directed to",
-  "created_at": "string — ISO 8601"
+  "intent_id": "intent_<id>",
+  "created_at": "ISO-8601",
+  "status": "staged|in_progress|complete|superseded|stale|cancelled",
+  "action_type": "string",
+  "target": {},
+  "action_fingerprint": "sha256:<hex>",
+  "expected_postconditions": [],
+  "idempotency_key": "string",
+  "correlation_id": "corr_<id>",
+  "approval_ref": null,
+  "attempts": 0,
+  "max_attempts": 10,
+  "lease": null,
+  "last_error": null
 }
 ```
 
-Proposal type `behavioral_signal` is used when Corvus detects an anomaly or pattern that should be reviewed by Praxis for potential behavior shift extraction.
+Completion requires verified postconditions, not merely a successful function return.
 
----
-
-## BehavioralSignal
-
-Used by: Corvus (writes to Praxis intake), Praxis (reads from intake).
-
-Written to: `{agent_root}/commons/data/ocas-praxis/intake/{signal_id}.json`
+## ExecutionEvidence
 
 ```json
 {
-  "signal_id": "string — unique identifier",
-  "source_skill": "ocas-corvus",
-  "timestamp": "string — ISO 8601",
-  "signal_type": "string — anomaly_detected|pattern_validated|regression_flagged",
-  "target_skill": "string — skill the behavior concerns",
-  "description": "string — what was observed",
-  "evidence_refs": ["string — journal run_ids or pattern_ids that support this"],
-  "confidence": "string — high|med|low",
-  "suggested_event_type": "string|null — suggested Praxis event_type for lesson extraction"
+  "run_id": "run_<id>",
+  "timestamp": "ISO-8601",
+  "component_id": "string",
+  "status": "ok|error|skipped|degraded",
+  "correlation_id": "corr_<id>|null",
+  "intents_processed": 0,
+  "side_effects_executed": false,
+  "postconditions_verified": false,
+  "not_activity_reason": null,
+  "error": null,
+  "artifact_hashes": []
 }
 ```
 
----
+## AgentTaskContract
+
+```json
+{
+  "task_id": "task_<id>",
+  "objective": "string",
+  "input": {},
+  "expected_result_schema": {},
+  "expected_postconditions": [],
+  "dedupe_key": "string",
+  "allow_parallel": false,
+  "timeout_seconds": 900,
+  "side_effect_policy": "none|declared|approval_required",
+  "required_capabilities": [],
+  "correlation_id": "corr_<id>",
+  "causation_id": null
+}
+```
 
 ## VariantProposal
 
-Used by: Mentor (writes to Forge intake), Forge (reads from intake).
-
-Written to: `{agent_root}/commons/data/ocas-forge/intake/{proposal_id}.json`
-
 ```json
 {
-  "proposal_id": "string — unique identifier",
-  "source_skill": "ocas-mentor",
-  "timestamp": "string — ISO 8601",
-  "target_skill": "string — skill to improve",
-  "base_version": "string — current champion version",
-  "observed_problem": "string — what is underperforming",
-  "supporting_evidence": ["string — journal run_ids, OKR scores, or evaluation IDs"],
-  "proposed_changes": "string — description of what should change",
-  "expected_improvement": "string — which OKR metric and by how much",
-  "evaluation_plan": "string — how the variant will be tested",
-  "minimum_runs": "number — minimum runs before promotion decision",
-  "critical_non_regression_conditions": ["string — OKRs that must not regress"]
+  "proposal_id": "prop_<id>",
+  "target_component": "string",
+  "base_version": "string",
+  "observed_problem": "string",
+  "supporting_evidence": [],
+  "proposed_changes": "string",
+  "evaluation_plan": "string",
+  "environment_fingerprint": "sha256:<hex>|null"
 }
 ```
-
----
-
-## VariantDecision
-
-Used by: Mentor (writes), Forge (reads and acts on).
-
-Written to: `{agent_root}/commons/data/ocas-forge/intake/{decision_id}.json`
-
-```json
-{
-  "decision_id": "string — unique identifier",
-  "variant_id": "string",
-  "target_skill": "string",
-  "decision": "string — promote|continue_testing|archive|reject|emergency_rollback",
-  "rationale": "string",
-  "aggregate_scores": "object — OKR scores across evaluation window",
-  "confidence": "string — high|med|low",
-  "non_regression_check": "boolean",
-  "evaluation_window_runs": "number",
-  "timestamp": "string — ISO 8601"
-}
-```
-
----
-
-## LogEvent
-
-Used by: skills that maintain append-only event logs.
-
-```json
-{
-  "event_id": "string — unique identifier (evt_{hash})",
-  "timestamp": "string — ISO 8601",
-  "skill_id": "string",
-  "event_type": "string — skill-defined category",
-  "summary": "string — brief human-readable description",
-  "data": "object|null — event-specific payload",
-  "related_ids": ["string — references to related records"]
-}
-```
-
----
-
-## SkillStatus
-
-Used by: all skills via their `.status` command.
-
-```json
-{
-  "skill_id": "string",
-  "skill_version": "string",
-  "timestamp": "string — ISO 8601",
-  "state": "string — healthy|degraded|error",
-  "summary": "string — brief human-readable status",
-  "metrics": "object — skill-specific status metrics"
-}
-```
-
----
-
-## JournalEntry
-
-Used by: all skills that write journal entries.
-
-See `spec-ocas-journal.md` for the full specification including champion/challenger pairing, OKR evaluation, and runtime telemetry.
-
-Minimum required fields:
-
-```json
-{
-  "run_id": "string — unique run identifier (r_{hash})",
-  "comparison_group_id": "string — (cg_{hash})",
-  "role": "string — champion|challenger",
-  "skill_name": "string",
-  "skill_version": "string",
-  "journal_spec_version": "1.3",
-  "journal_type": "string — observation|action|research",
-  "timestamp_start": "string — ISO 8601",
-  "timestamp_end": "string — ISO 8601",
-  "normalized_input_hash": "string — sha256:...",
-  "decision": "object — what was decided or produced",
-  "metrics": "object — run metrics",
-  "okr_evaluation": "object — universal and skill-specific OKR scores"
-}
-```
-
----
-
-## ConfigBase
-
-Used by: all skills that maintain a config file.
-
-Every skill's `config.json` at `{agent_root}/commons/data/{skill-name}/config.json` includes these base fields plus skill-specific configuration:
-
-```json
-{
-  "skill_id": "string",
-  "skill_version": "string",
-  "config_version": "string — incremented on config changes",
-  "created_at": "string — ISO 8601",
-  "updated_at": "string — ISO 8601"
-}
-```
-
----
 
 ## ExperimentRequest
 
-Used by: Mentor (writes to Fellow intake), Fellow (reads from intake).
-
-Written to: `{agent_root}/commons/data/ocas-fellow/intake/{experiment_id}.json`
-
 ```json
 {
-  "experiment_id": "string — unique identifier (exp_{hash})",
-  "source_skill": "ocas-mentor",
-  "timestamp": "string — ISO 8601",
-  "target": "string — component identifier (skill name, heuristic id, or workflow path)",
-  "program_id": "string — experiment program identifier",
-  "objective": "string — primary metric to optimize",
-  "benchmark": "string — benchmark identifier",
-  "budget": {
-    "type": "string — wall_clock | task_count | token_budget | simulation_window",
-    "value": "number"
-  },
-  "constraints": {
-    "max_variants": "number",
-    "max_cycles": "number",
-    "mutation_surface": ["string — paths or fields eligible for mutation"],
-    "protected_surface": ["string — paths or fields that must not change"]
-  },
-  "promotion": {
-    "threshold": "number — minimum improvement required (e.g., 0.03)",
-    "automatic": "boolean — promote without manual approval if threshold met",
-    "rollback_on_regression": true
-  },
-  "runner": {
-    "type": "string — command | function | workflow",
-    "entrypoint": "string",
-    "timeout_seconds": "number"
-  },
-  "metric_extractor": {
-    "type": "string — json | regex | function | structured_output",
-    "source": "string — artifact path or journal field",
-    "selector": "string — field path or regex pattern"
-  }
+  "experiment_id": "exp_<id>",
+  "target_component": "string",
+  "target_hash": "sha256:<hex>",
+  "benchmark_hash": "sha256:<hex>",
+  "environment_fingerprint": "sha256:<hex>",
+  "runner_version": "string",
+  "constraints": {},
+  "correlation_id": "corr_<id>"
 }
 ```
-
----
 
 ## CycleResult
 
-Used by: Fellow (writes to Mentor intake), Mentor (reads from intake).
-
-Written to: `{agent_root}/commons/data/ocas-mentor/intake/{cycle_id}.json`
-
 ```json
 {
-  "cycle_id": "string — unique identifier (cyc_{hash})",
-  "experiment_id": "string — references the ExperimentRequest that triggered this cycle",
-  "source_skill": "ocas-fellow",
-  "timestamp": "string — ISO 8601",
-  "target": "string — component that was evaluated",
-  "baseline_score": "number",
-  "best_variant_id": "string | null — null if no variant beat the baseline",
-  "best_variant_score": "number | null",
-  "improvement": "number | null — best_variant_score minus baseline_score",
-  "decision": "string — promote | no_change | abort",
-  "artifacts_ref": "string | null — path to variant artifacts",
-  "rollback_ref": "string | null — path to rollback snapshot",
-  "abort_reason": "string | null — populated when decision is abort"
+  "cycle_id": "cyc_<id>",
+  "experiment_id": "exp_<id>",
+  "decision": "promote|no_change|abort",
+  "baseline_score": 0.0,
+  "best_variant_score": null,
+  "target_hash": "sha256:<hex>",
+  "benchmark_hash": "sha256:<hex>",
+  "environment_fingerprint": "sha256:<hex>",
+  "artifact_hash": "sha256:<hex>|null",
+  "abort_reason": null
 }
 ```
 
----
+Promotion evidence is stale if the target, benchmark, environment or reviewed artifact fingerprint changes.
 
-## Domain Extension Schemas
-
-The schemas below are skill-specific extensions of shared base schemas. They are documented here for cross-skill discoverability. Each extension follows the rules in the Extension Rules section — base fields are preserved.
-
----
-
-### PortfolioOutcomeRecord
-
-**Extends:** JournalEntry (decision field)
-**Used by:** Rally (writes), Vesper (reads via cooperative interface)
-**Written to:** `{agent_root}/commons/data/ocas-rally/reports/YYYY-MM-DD-daily.json`
+## ConfigBase
 
 ```json
 {
-  "report_date": "string — ISO 8601 date",
-  "portfolio_value": "number — total portfolio value in USD",
-  "daily_return": "number — daily return as decimal (e.g., 0.012 = 1.2%)",
-  "ytd_return": "number — year-to-date return",
-  "drawdown": "number — current drawdown from peak as decimal",
-  "regime_score": "number — 0.0 to 1.0, market regime assessment",
-  "top_movers": [
-    {
-      "ticker": "string",
-      "pct_change": "number",
-      "direction": "string — up|down"
-    }
-  ],
-  "allocation_changes": [
-    {
-      "ticker": "string",
-      "from_weight": "number",
-      "to_weight": "number",
-      "reason": "string"
-    }
-  ],
-  "risk_flags": ["string — active risk constraint violations or warnings"],
-  "factor_ic": "object | null — information coefficient by factor, if computed",
-  "generated_at": "string — ISO 8601"
+  "component_id": "string",
+  "component_version": "string",
+  "config_version": "string",
+  "created_at": "ISO-8601",
+  "updated_at": "ISO-8601"
 }
 ```
 
-Vesper reads `top_movers`, `risk_flags`, `daily_return`, and `allocation_changes` for briefing inclusion.
+## Extension rules
 
----
+Domain schemas may extend these objects but MUST NOT:
 
-### ConsumptionSignal
-
-**Extends:** Signal (payload.data)
-**Used by:** Taste (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-taste/signals.jsonl`
-
-This schema is Taste-internal. It is not emitted to Elephas. It represents a single observed consumption event.
-
-```json
-{
-  "signal_id": "string — sig_{hash}",
-  "timestamp": "string — ISO 8601",
-  "source_skill": "ocas-taste",
-  "source_journal_type": "Observation",
-  "payload": {
-    "type": "string — item|venue|media|product|concept",
-    "item_id": "string — reference to ItemRecord",
-    "action": "string — consumed|saved|skipped|dismissed|rated",
-    "rating": "number | null — 1–5 if rated",
-    "context": "string | null — situational context if available"
-  },
-  "confidence": "string — high|med|low",
-  "status": "string — active|consumed"
-}
-```
-
----
-
-### ItemRecord
-
-**Used by:** Taste (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-taste/items.jsonl`
-
-```json
-{
-  "item_id": "string — item_{hash}",
-  "item_type": "string — venue|media|product|concept",
-  "name": "string",
-  "attributes": "object — type-specific attributes (e.g., cuisine, genre, category)",
-  "first_seen": "string — ISO 8601",
-  "last_seen": "string — ISO 8601",
-  "signal_count": "number",
-  "aggregate_strength": "number — 0.0 to 1.0"
-}
-```
-
----
-
-### EvaluationResult
-
-**Used by:** Mentor (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-mentor/evaluations/{evaluation_id}.json`
-
-```json
-{
-  "evaluation_id": "string — eval_{hash}",
-  "target_skill": "string",
-  "evaluated_at": "string — ISO 8601",
-  "evaluation_window_runs": "number",
-  "okr_scores": "object — universal and domain OKR scores",
-  "trend": "string — improving|stable|degrading",
-  "regression_flags": ["string — OKRs below threshold"],
-  "recommendation": "string — continue|investigate|propose_variant",
-  "notes": "string | null"
-}
-```
-
----
-
-### MCPDiscoveryRecord
-
-**Extends:** DecisionRecord (decision field)
-**Used by:** Scout (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-scout/mcp_discovery_cache.json`
-
-Tracks each runtime MCP server discovery attempt during a `scout.sources.discover` or `scout.research` run. Used by Scout to avoid re-probing known-good or known-bad servers within the cache TTL (24h for query results, 7-day for list hashes, 30-day for server metadata).
-
-```json
-{
-  "discovery_id": "string — unique identifier",
-  "timestamp": "string — ISO 8601",
-  "registry": "string — source registry (e.g., nothumansearch.ai, github:soxoj/awesome-osint-mcp-servers)",
-  "query": "string — the discovery query used",
-  "servers_found": "number — count of candidate servers returned",
-  "servers_connected": "number — count successfully probed and connected",
-  "servers_used": ["string — server identifiers actually invoked in this run"],
-  "auth_type": "string — none|api_key|oauth",
-  "relevance_score": "number — 0.0 to 1.0, assessed relevance to research query",
-  "cache_hit": "boolean — true if result served from cache",
-  "layer": "string — list_scan|runtime_query"
-}
-```
-
----
-
-### PersonToolRecord
-
-**Used by:** Scout (writes internally)
-**Written to:** `{agent_root}/commons/data/ocas-scout/person_tools.jsonl`
-
-Tracks each individual person-specific OSINT tool invocation during a research run. Used by Scout for OKR evaluation (`person_tool_coverage`) and to avoid duplicate invocations within a session.
-
-```json
-{
-  "record_id": "string — unique identifier",
-  "run_id": "string — references the parent JournalEntry run_id",
-  "timestamp": "string — ISO 8601",
-  "tool_name": "string — e.g., sherlock, maigret, h8mail, theharvester",
-  "input_type": "string — username|email|phone|full_name|domain",
-  "input_value": "string — the value passed to the tool (hashed if PII-sensitive)",
-  "status": "string — success|error|skipped|not_applicable",
-  "findings_count": "number — number of results returned",
-  "error": "string | null — error message if status is error"
-}
-```
-
----
-
-## Extension Rules
-
-Skills may extend any shared schema by adding fields. They must not:
-- Remove or rename base fields
-- Change the semantic meaning of base fields
-- Change the type of base fields
-
-Extended schemas document which base schema they extend and what fields they add.
+- remove principal ownership from memory-affecting records;
+- tunnel structured payloads through prose strings;
+- discard correlation/causation IDs in multi-step workflows;
+- reinterpret an inference as a user-stated/verified fact;
+- treat a journal/signal as automatically promoted durable memory;
+- mark an intent complete without checking declared postconditions.
