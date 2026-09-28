@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "updated": "2026-09-27",
+  "memory_provider": "chronicle",
+  "retired_components": {
+    "ocas-elephas": {"replacement": "chronicle", "reason": "Chronicle is the memory/context provider; Elephas is no longer an active mediation layer."},
+    "ocas-corvus": {"replacement": null, "reason": "Standalone pattern-analysis component retired; pattern responsibilities belong to their current domain owners."},
+    "mempalace": {"replacement": "chronicle", "reason": "Legacy memory provider retired."}
+  },
+  "components": [
+    {"id":"chronicle","type":"runtime","layer":"memory","status":"active","visibility":"public","responsibility":"Principal-scoped durable memory, beliefs, provenance, retrieval, ACLs and temporal context."},
+    {"id":"user-dreaming","type":"subsystem","layer":"memory","status":"active-design","visibility":"public-description","responsibility":"Offline synthesis about the owner/user only; durable outputs belong to the user principal."},
+    {"id":"agent-growth","type":"subsystem","layer":"identity","status":"active","visibility":"private-implementation","responsibility":"Agent autobiographical continuity, self-observation, dreams and identity evolution; never owns user memory."},
+    {"id":"ocas-usercontext","type":"skill","layer":"context","status":"active","visibility":"public","responsibility":"Rebuildable current-state USER.md projection."},
+    {"id":"ocas-finch","type":"skill","layer":"evolution","status":"active","visibility":"public","responsibility":"Session learning and compact directive-context maintenance."},
+    {"id":"ocas-praxis","type":"skill","layer":"evolution","status":"active","visibility":"public","responsibility":"Bounded agent behavioral adaptation from outcomes and lessons."},
+    {"id":"ocas-mentor","type":"skill","layer":"evolution","status":"active","visibility":"public","responsibility":"Evaluation and improvement orchestration."},
+    {"id":"ocas-fellow","type":"skill","layer":"evolution","status":"active","visibility":"public","responsibility":"Controlled empirical experimentation."},
+    {"id":"ocas-forge","type":"skill","layer":"evolution","status":"active","visibility":"public","responsibility":"Skill architecture, build and validation."},
+    {"id":"ocas-lucid","type":"skill","layer":"memory","status":"active","visibility":"public","responsibility":"Nightly journal curation for configured memory ingestion; not agent autobiographical dreaming."},
+    {"id":"ocas-scout","type":"skill","layer":"signal","status":"active","visibility":"public"},
+    {"id":"ocas-sift","type":"skill","layer":"signal","status":"active","visibility":"public"},
+    {"id":"ocas-look","type":"skill","layer":"signal","status":"active","visibility":"public"},
+    {"id":"ocas-reach","type":"skill","layer":"signal","status":"active","visibility":"public"},
+    {"id":"ocas-thread","type":"skill","layer":"signal","status":"active","visibility":"private"},
+    {"id":"ocas-weave","type":"skill","layer":"relationship","status":"active","visibility":"public"},
+    {"id":"ocas-taste","type":"skill","layer":"preference","status":"active","visibility":"public"},
+    {"id":"ocas-dispatch","type":"skill","layer":"execution","status":"active","visibility":"private"},
+    {"id":"ocas-voyage","type":"skill","layer":"execution","status":"active","visibility":"public"},
+    {"id":"ocas-rally","type":"skill","layer":"execution","status":"active","visibility":"public"},
+    {"id":"ocas-sands","type":"skill","layer":"execution","status":"active","visibility":"public"},
+    {"id":"ocas-custodian","type":"skill","layer":"execution","status":"active","visibility":"public"},
+    {"id":"ocas-imagine","type":"skill","layer":"execution","status":"active","visibility":"public"},
+    {"id":"ocas-bones","type":"skill","layer":"signal","status":"active","visibility":"private"},
+    {"id":"ocas-inception","type":"skill","layer":"evolution","status":"active","visibility":"private"},
+    {"id":"ocas-vesper","type":"skill","layer":"interface","status":"active","visibility":"public"},
+    {"id":"ocas-haiku","type":"skill","layer":"interface","status":"active","visibility":"private"},
+    {"id":"hermes-identity","type":"plugin","layer":"runtime","status":"active","visibility":"private-implementation"},
+    {"id":"hermes-custodian","type":"plugin","layer":"runtime","status":"active","visibility":"private-implementation"}
+  ]
+}
