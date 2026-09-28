@@ -1,334 +1,218 @@
 # OCAS Skill Build Template
 
-Version: 2.2.0
+Version: 3.0.0
 Author: Indigo Karasu
-
-Changes from 2.1.0: updated storage requirements to central {agent_root}/commons/ layout; added journal path requirement; added interfaces section; added spec file reference table; clarified visibility and journal type requirements.
-
----
+Status: normative
 
 ## Purpose
 
-This document is the single implementation spec for a coder LLM. It must be fully self-contained. The coder generates a complete Agent Skill package from this file alone.
+Implementation contract for building or materially revising an OCAS skill.
 
-The output is the actual skill package -- not a planning memo, not a worksheet, not a commentary-heavy response.
+The output is an installable skill package, not a planning memo.
 
----
+## Before building
 
-## Skill Identity
+1. Read components.json.
+2. Confirm the responsibility is not already owned.
+3. Read spec-ocas-architecture.md and spec-ocas-interfaces.md.
+4. Decide whether the behavior belongs in a skill or shared runtime contract.
+5. Identify principal/memory implications.
+6. Identify privileged capabilities/credentials.
+7. Identify durable side effects and recovery/postconditions.
 
-### Skill name
-`ocas-{skill}`
+## Skill identity
 
-### Author metadata
-- Author: Indigo Karasu
-- Email: <third-party-or-user-email>
+- Name: ocas-{skill}
+- Version: semantic version
+- Type: shortcut | workflow | system
+- Visibility: public | private
+- One-sentence responsibility
 
-### Skill type
-Choose one: shortcut / workflow / system
+## Required base package
 
-### One-sentence build objective
-State exactly what the skill must enable.
-
----
-
-## Build Rules
-
-The coder must:
-- Build a real Agent Skill package
-- Keep SKILL.md lean, operational, and routing-aware
-- Include only files that materially improve behavior or reliability
-- Prefer examples, schemas, and exact instructions over long explanation
-- Define every required term locally
-- Avoid process language about design phases, approvals, or prior documents
-- Avoid mentioning absent resources, hidden context, or internal pipeline assumptions
-- Optimize the package for actual use, not documentation completeness
-
----
-
-## Required Output
-
-Minimum structure unless the specification below requires more:
-
-```
+~~~text
 ocas-{skill}/
   SKILL.md
   README.md
   CHANGELOG.md
-```
+~~~
 
-`skill.json` is the legacy format and should not be created for new packages. SKILL.md frontmatter (YAML) is the current standard.
+Add only justified support:
 
-`README.md` and `CHANGELOG.md` are required for every package. Follow the structure defined in `spec-ocas-skill-publishing.md`.
+~~~text
+references/
+scripts/
+assets/
+evals/
+capabilities.json
+~~~
 
-Add only justified support directories:
+capabilities.json is required when the skill requests privileged/destructive writes, external account mutation, or brokered credentials.
 
-```
-ocas-{skill}/
-  references/
-  scripts/
-  assets/
-```
+## SKILL.md requirements
 
----
+Every skill defines:
 
-## Package Specification
+- when to use / when not to use;
+- responsibility boundary;
+- first useful action;
+- workflow where relevant;
+- failure/degraded behavior;
+- storage;
+- journals;
+- interfaces;
+- background tasks when any;
+- support-file map when any.
 
-### skill.json
+## Storage
 
-Minimum required fields:
-- `name`: `ocas-{skill}`
-- `version`: `{version}`
-- `description`: routing-optimized text
-- `author`: `Indigo Karasu`
-- `email`: `<third-party-or-user-email>`
+Private state:
 
-### Description Requirements
-
-The description must:
-- State what the skill does
-- State when it should be used
-- Use natural request language where appropriate
-- Optimize for routing and discoverability
-- Avoid vague labels and branding-heavy language
-
-### SKILL.md
-
-The main operational file. Tells the agent:
-- When to use the skill
-- What the skill is responsible for
-- How to execute the task
-- When to consult any support file
-
-Keep only load-bearing content in SKILL.md.
-
----
-
-## SKILL.md Shape by Skill Type
-
-### Shortcut (20–120 lines)
-Sections: title, when to use, quick actions or commands, important inputs or options, failure cases or caveats.
-
-### Workflow (80–250 lines)
-Sections: title, when to use, inputs and assumptions, ordered workflow, output requirements, boundaries and pitfalls.
-
-### System (150–300 lines)
-Sections: title, trigger conditions, purpose and boundaries, decision model, execution loop, support file map, storage layout, validation rules.
-
----
-
-## Storage Requirements
-
-Every skill with persistent state uses these paths. No data inside the skill package.
-
-```
-{agent_root}/commons/data/{skill-name}/config.json    — skill configuration
-{agent_root}/commons/data/{skill-name}/*.jsonl        — append-only logs
-{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json  — journal files
-```
-
-For LadybugDB skills only:
-```
-{agent_root}/commons/db/{skill-name}/{skill-name}.lbug
-```
-
-Config must include ConfigBase fields. See `spec-ocas-shared-schemas.md`.
-
-### Storage Layout Section (required in system skill SKILL.md)
-
-```
+~~~text
 {agent_root}/commons/data/ocas-{skill}/
-  config.json
-  {primary_log}.jsonl
-  decisions.jsonl
-  intents.jsonl            — durable intent queue (append-only)
-  evidence.jsonl           — execution evidence log (append-only)
-{agent_root}/commons/journals/ocas-{skill}/
-  YYYY-MM-DD/{run_id}.json
-```
+~~~
 
-For recovery storage requirements, see `spec-ocas-recovery.md`.
+Journals:
 
----
+~~~text
+{agent_root}/commons/journals/ocas-{skill}/YYYY-MM-DD/{run_id}.json
+~~~
 
-## Journal Requirements
+Cross-component interfaces:
 
-Every skill run writes a journal. Runs missing journals are invalid.
+~~~text
+{agent_root}/commons/interfaces/{consumer}/
+{agent_root}/commons/exports/{producer}/
+~~~
 
-Declare which journal type(s) this skill emits:
-- **Observation Journal** — signals discovered, no external side effects
-- **Action Journal** — external side effects executed
-- **Research Journal** — structured multi-source research sessions
+Never use another component's private state/database as an informal API.
 
-Skills may emit multiple types depending on the command being run.
+## Memory and principals
 
-Journal path: `{agent_root}/commons/journals/ocas-{skill}/YYYY-MM-DD/{run_id}.json`
+A durable-memory proposal uses Chronicle's sanctioned contract and explicit target principal.
 
-See `spec-ocas-journal.md` for the full journal specification.
+It records:
 
-### Recovery Requirements
+- target principal;
+- source actor/speaker;
+- evidence/provenance;
+- claim/derivation type;
+- confidence/temporal validity where relevant.
 
-Every scheduled run must also write an evidence record to `evidence.jsonl`, including runs where no side effects occur. The `not_activity_reason` field is mandatory for no-op runs. Schedule gap detection, dependency degradation with fallback cascades, data integrity validation, and self-repair with re-validation are required for all scheduled skills. Reference `spec-ocas-recovery.md`.
+User Dreaming and agent autobiographical growth are separate write domains.
 
----
+See spec-ocas-principals-and-memory-boundaries.md and spec-ocas-user-dreaming.md.
 
-## Inter-Skill Interfaces
+## Interfaces
 
-If this skill sends signals to or receives signals from another skill, specify the intake path and format here. Reference `spec-ocas-interfaces.md` for all defined interfaces.
+Cross-component payloads use InterfaceEnvelope plus typed payload.
 
-Do not create undocumented inter-skill interfaces.
+Do not:
 
----
+- add undocumented private-directory reads;
+- tunnel JSON through arbitrary strings;
+- write runtime databases directly;
+- introduce a retired dependency.
 
-## Support File Rules
+## Privileged capabilities
 
-### references/
-Create only when material is too detailed for SKILL.md. For each file: filename, purpose, exactly when SKILL.md should direct the agent to read it.
+For each privileged operation declare:
 
-### scripts/
-Create only when deterministic help materially improves correctness. For each script: filename, language/runtime, exact purpose, inputs, outputs.
+- capability id;
+- operation;
+- category;
+- default policy;
+- approval requirement;
+- required connector/tool;
+- auth scope/credential class;
+- allowed egress service/host if relevant;
+- request/response schema;
+- idempotency rule.
 
-### assets/
-Create only when the skill ships useful reusable artifacts. For each asset: filename, purpose, how the agent should use it.
+See spec-ocas-runtime-contracts.md.
 
----
+## Credentials
 
-## Required Structural Sections
+Prefer opaque/brokered credential handles where supported.
 
-Every system skill SKILL.md must include:
+Never write credential values into skills, journals, interfaces, Chronicle, evidence, or generated artifacts.
 
-**Responsibility Boundary** — what this skill does, what it does not do, which other skill owns the adjacent responsibility.
+## Recovery
 
-**Optional Skill Cooperation** — skills this skill may cooperate with when present, but never depend on.
+Every scheduled or side-effecting workflow implements spec-ocas-recovery.md.
 
-**Journal Outputs** — which journal type(s) this skill emits and under what conditions.
+Minimum:
 
-**Storage Layout** — data and journal paths under `{agent_root}/commons/`.
+- durable intent before effect;
+- idempotency/dedupe;
+- claim/lease when concurrent;
+- evidence every run;
+- explicit no-op reason;
+- expected postconditions;
+- re-validation before success;
+- degradation/fallback;
+- schedule gap detection;
+- dead-letter handling for durable queues.
 
-**Recovery Behavior** — how the skill handles missed runs, failed executions, self-diagnosis, and escalation. Every scheduled run must write an evidence record (including no-op runs with `not_activity_reason`). Reference `spec-ocas-recovery.md`.
+## Journals
 
-**Visibility** — `public` or `private`.
+Every meaningful run writes JournalEntry v2.
 
----
+Action runs record postcondition verification, not only tool/process success.
 
-## Specificity Map
+Memory-related runs include principal context.
 
-Be exact about: naming, file paths (use `{agent_root}/commons/` root), metadata fields, command syntax, schemas, validation checks, routing language, journal types.
+## Artifacts
 
-Allow flexibility in: prose descriptions, section ordering within guidelines, minor wording variation.
+If the skill creates user-deliverable artifacts, define an ArtifactGate appropriate to the artifact type:
 
----
+generate -> structural validation -> render/materialize -> inspect -> placeholder/secret scan -> hash/provenance -> deliver.
 
-## Validation Requirements
+## Evaluation
 
-### Routing Validation
-Provide realistic prompts that should trigger the skill.
-Provide realistic prompts that should not trigger the skill.
-The description and SKILL.md must support that separation.
+Evolvable skills SHOULD ship declarative evals.
 
-### Structural Validation
-Confirm:
-- All required files exist
-- Filenames are consistent
-- Support directories exist only when justified
-- SKILL.md points to any support file it depends on
-- Storage paths use `{agent_root}/commons/` root
-- Journal path is declared
-- Major duplication across files has been avoided
+Promotion evidence binds to exact target, benchmark, runner, environment, and artifact fingerprints.
 
-### Usefulness Validation
-Confirm:
-- The skill has one sharp promise
-- First useful action is obvious
-- Instructions are specific where failure is costly
-- The package is concise enough to be maintainable
+Challengers cannot execute real external side effects unless isolated simulation explicitly permits them.
 
----
+## Runtime introspection
 
-## Reference Specifications
+Do not hardcode claims about currently installed tools/connectors/models when the runtime can introspect them.
 
-All OCAS skills are built against these specifications:
+Discover at execution time and degrade honestly.
 
-| File | Purpose |
-|---|---|
-| `spec-ocas-architecture.md` | System layers, data flow, skill registry |
-| `spec-ocas-storage-conventions.md` | Storage roots, file types, retention |
-| `spec-ocas-journal.md` | Journal structure, OKRs, champion/challenger |
-| `spec-ocas-ontology.md` | Entity types, relationships, identity model |
-| `spec-ocas-shared-schemas.md` | Canonical cross-skill data objects |
-| `spec-ocas-interfaces.md` | Inter-skill communication paths and formats |
-| `ocas-skill-authoring-rules.md` | Design principles, validation standard |
-| `spec-ocas-skill-publishing.md` | README, CHANGELOG, release structure |
-| `spec-ocas-scripts.md` | `scripts/` directory best practices, audit checklist |
-| `spec-ocas-recovery.md` | Recovery, self-diagnosis, self-repair, log compaction |
+## Validation checklist
 
----
+- [ ] ownership checked against components.json
+- [ ] no retired dependency
+- [ ] routing tests pass
+- [ ] package structure valid
+- [ ] private storage boundaries valid
+- [ ] interfaces typed/versioned
+- [ ] memory writes principal-scoped
+- [ ] capability/credential rules defined
+- [ ] recovery/postconditions implemented
+- [ ] journal valid
+- [ ] artifact gate defined when needed
+- [ ] evaluation fingerprints defined when evaluated
+- [ ] no secrets/placeholders
+- [ ] README/CHANGELOG updated
 
-## Final Response Format for the Coder
+## Reference specs
 
-Return:
-1. Package tree
-2. Full contents of every file
-3. A brief validation summary
-
-Do not return planning commentary, process narration, or references to external documents unless the build spec explicitly requires it.
-
----
-
-## Fill-In Block
-
-Complete this block before giving the document to the coder LLM.
-
-### Skill Summary
-- Skill name:
-- Version:
-- Skill type:
-- One-sentence build objective:
-- Visibility:
-
-### Routing Description Draft
-- Description:
-
-### Required Files
-- `skill.json`:
-- `SKILL.md`:
-- Additional files:
-
-### SKILL.md Required Sections
-- Section list:
-
-### Support Files
-- `references/`:
-- `scripts/`:
-- `assets/`:
-
-### Storage Layout
-- Data path: `{agent_root}/commons/data/ocas-{skill}/`
-- Journal path: `{agent_root}/commons/journals/ocas-{skill}/`
-- DB path (if applicable): `{agent_root}/commons/db/ocas-{skill}/`
-
-### Journal Output
-- Journal type(s):
-- Conditions for each type:
-
-### Inter-Skill Interfaces
-- Sends to:
-- Receives from:
-
-### Exact Constraints
-- Naming:
-- Paths:
-- Metadata:
-- Commands/schemas:
-- Validation checks:
-
-### Required Structural Sections
-- Responsibility Boundary:
-- Optional Skill Cooperation:
-- Journal Outputs:
-- Recovery Behavior:
-- Visibility:
-
-### Trigger Tests
-- Should trigger:
-- Should not trigger:
+- spec-ocas-architecture.md
+- components.json
+- spec-ocas-principals-and-memory-boundaries.md
+- spec-ocas-user-dreaming.md
+- spec-ocas-runtime-contracts.md
+- spec-ocas-storage-conventions.md
+- spec-ocas-interfaces.md
+- spec-ocas-shared-schemas.md
+- spec-ocas-journal.md
+- spec-ocas-recovery.md
+- spec-ocas-workflow-plans.md
+- spec-ocas-skill-improvements.md
+- spec-ocas-scripts.md
+- spec-ocas-skill-publishing.md
+- ocas-skill-authoring-rules.md

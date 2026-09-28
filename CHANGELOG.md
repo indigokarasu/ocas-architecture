@@ -1,3 +1,21 @@
+## [2026-09-27] OCAS v2 principal-scoped architecture
+
+### Changes
+- Promoted Chronicle to the direct durable memory/context substrate.
+- Added explicit user-principal vs agent-principal ownership with cross-principal ACL/provenance rules.
+- Added a normative User Dreaming contract that writes user-owned derived memory only.
+- Preserved agent autobiographical growth as a separate agent-owned identity/evolution subsystem.
+- Added components.json lifecycle registry with active/transitional/planned states and retired-component history.
+- Replaced private-directory and legacy intake coupling with typed interface queues, exported projections and sanctioned runtime/Chronicle contracts.
+- Promoted shared schemas to v2 with principal ownership, provenance, durable intent, task contracts, correlation/causation and evaluation fingerprints.
+- Promoted journals to v2 immutable evidence; journals are no longer implicitly durable memory.
+- Promoted recovery to verified-postcondition completion with leases, dedupe, action fingerprints and dead-letter handling.
+- Added runtime contracts for CapabilityManifest, brokered credentials, privileged operations, AgentTaskContract, ProvenanceLedger, ArtifactGate and runtime introspection.
+- Promoted skill authoring/build rules to the v2/v3 architecture.
+- Added CI architecture validation preventing retired dependencies from re-entering normative contracts.
+
+---
+
 ## [2026-07-15] Skill architecture improvements specification
 
 ### Changes

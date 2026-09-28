@@ -1,499 +1,187 @@
-# OCAS Inter-Skill Interfaces
+# OCAS Inter-Component Interfaces
 
-Spec Version: 1.5.0
+Spec Version: 2.0.0  
 Author: Indigo Karasu
-
-Changes from 1.4.0: updated Rally ↔ Sift Sentiment section to reflect rally v3.8.0 — social_heat is now handled by Rally directly via a local SearXNG instance (rally_data_sources.py), not via Sift. rumor_score and news_pulse via Sift remain as optional cooperation when Sift is present. Section renamed to Rally ↔ Sift: News Pulse and Rumor Score to reflect reduced scope.
-
-Changes from 1.3.4: added Rally ↔ Sift Sentiment Enrichment and News Pulse cooperative query row (four sentiment workflows: social_heat, rumor_score, short_interest, news_pulse via Sift -> SearchX -> SearXNG chain with x.com / Reddit / LinkedIn / news engines / SEC EDGAR); added Rally emission scope subsection under Elephas Signal Intake documenting Thing and Concept/Event signal types Rally writes to Chronicle intake. Reflects Rally v3.5.4 research memory and sentiment default-on.
-Changes from 1.3: added Sands → Vesper Schedule Brief Intake interface; added Sands to polling cadence table.
-Changes from 1.2: added Rally → Vesper Portfolio Outcome cooperative read interface; added Vesper → Dispatch Briefing Delivery session-scoped interface; added Cooperative Query Interfaces section documenting five informal read-only cross-skill queries (Sift↔Thread, Sift↔Weave, Scout↔Weave, Taste↔Sift, Voyage↔Sift); added Rally and Vesper to polling cadence table.
-
----
 
 ## Purpose
 
-This document defines the contracts for all inter-skill communication in the OCAS ecosystem. Skills communicate through shared filesystem paths under `{agent_root}/commons/`, not through direct calls or shared memory.
+This specification defines supported communication between OCAS skills, Hermes runtime components, Chronicle, and system-evolution services. It replaces informal private-directory reads and legacy component-specific memory intake paths with typed contracts.
 
-All interface paths, file formats, and handoff contracts are defined here. Skills reference this document when they need to send or receive data from another skill.
+## Transport preference
 
----
+Use the narrowest authoritative transport:
 
-## General Rules
+1. runtime/tool API for synchronous capability calls;
+2. Chronicle contract for durable memory/context;
+3. filesystem queue for asynchronous component handoff;
+4. exported read-only projection for intentionally shared snapshots.
 
-- Skills communicate by writing files to another skill's intake directory.
-- The consuming skill polls its intake directory during its normal execution cycle.
-- Files are immutable after writing. The producer must not modify a file after placing it in the intake directory.
-- After the consumer processes a file, it moves it to `intake/processed/`. The producer must not delete or read from `processed/`.
-- Intake directories are created by the consuming skill on initialization. Producers must create the directory if it does not exist before writing.
-- All interface files are JSON. Filenames use the record's primary ID as the name: `{id}.json`.
-- See `spec-ocas-shared-schemas.md` for the schemas referenced here.
+A component's private `commons/data/{component-id}/` directory is never an interface.
 
----
+## Interface envelope
 
-## Elephas Signal Intake
-
-### Purpose
-Skills emit Signal observations to Elephas for Chronicle ingestion.
-
-### Path
-```
-{agent_root}/commons/db/ocas-elephas/intake/{signal_id}.signal.json
-```
-
-### Producers
-Any skill that observes entities, relationships, or events worth promoting to Chronicle: Sift, Scout, Look, Thread, Corvus, Rally (Thing + Concept/Event), Weave (optional), Triage (optional).
-
-### Rally emission scope
-
-Rally emits Thing signals and Concept/Event signals after every `rally.research` run when `config.research_memory.emit_to_elephas` is `true` (default, as of Rally v3.5.4).
-
-- **Thing signals**: securities in the investable universe, emitted when the Rally composite score changes materially (delta >= 0.05 since last emission) or on a weekly cadence per ticker (whichever is sooner). Payload fields: `symbol`, `name`, `sector`, `industry`, `market_cap_bn`, `rally_composite`, `rally_percentile_rank`, `is_current_holding`, plus standard `identifiers` block with `ticker` and `rally:ticker` types.
-- **Concept/Event signals**: material market events only (earnings release with confirmed date, M&A announcement, guidance revision, analyst rating change with price target update, 8-K filing with material content, dividend declaration or change). Payload fields: `event_type`, `subject_symbol`, `event_date`, `description`, `source`.
-
-Rally does NOT emit: intraday price ticks, internal pending-action state, portfolio holdings list (Vesper reads the daily report instead), or unconfirmed rumors (those live in Rally's local dossiers only).
-
-### Format
-Signal schema from `spec-ocas-shared-schemas.md`. The `.signal.json` extension distinguishes signal files from other intake files.
-
-### Consumption
-Elephas scans this directory during every `elephas.ingest.journals` run. Processed files move to `intake/processed/`.
-
-### Notes
-Signal emission is optional for standalone skills (Weave, Triage). Chronicle is a downstream consumer, not an upstream dependency. Rally's emission is also toggleable via `config.research_memory.emit_to_elephas: false` for deployments without Elephas.
-
----
-
-## Mentor Journal Feed
-
-### Purpose
-Mentor reads journals from all skills during heartbeat evaluation passes.
-
-### Path
-```
-{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
-```
-
-### Producers
-All skills (every run writes a journal).
-
-### Consumption
-Mentor scans `{agent_root}/commons/journals/` recursively during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. It tracks which `run_id`s have already been ingested via its own ingestion log at `{agent_root}/commons/data/ocas-mentor/ingestion_log.jsonl`.
-
-### Notes
-Mentor and Elephas are independent consumers of the same journal files. Neither blocks the other. Mentor reads for performance evaluation; Elephas reads to extract Chronicle candidates.
-
----
-
-## Corvus → Praxis Behavioral Signal
-
-### Purpose
-Corvus notifies Praxis when it detects a behavioral anomaly or opportunity in skill output patterns that may warrant lesson extraction or a behavior shift.
-
-### Path
-```
-{agent_root}/commons/data/ocas-praxis/intake/{signal_id}.json
-```
-
-### Producer
-Corvus only. Written during `corvus.analyze.light` or `corvus.analyze.deep` when a validated pattern has `proposal_type: behavioral_signal`.
-
-### Format
-BehavioralSignal schema from `spec-ocas-shared-schemas.md`.
+Every asynchronous filesystem message contains:
 
 ```json
 {
-  "signal_id": "sig_a7f2c1",
-  "source_skill": "ocas-corvus",
-  "timestamp": "2026-03-17T10:00:00-07:00",
-  "signal_type": "anomaly_detected",
-  "target_skill": "ocas-scout",
-  "description": "Scout retry_rate exceeded 0.20 threshold across last 8 runs",
-  "evidence_refs": ["r_b3e8d2", "r_c91f4a", "r_d2f1e3"],
-  "confidence": "high",
-  "suggested_event_type": "failure"
+  "message_id": "msg_<id>",
+  "message_type": "<contract-name>",
+  "schema_version": "1.0",
+  "producer_id": "ocas-example",
+  "producer_version": "1.2.3",
+  "created_at": "ISO-8601",
+  "expires_at": null,
+  "idempotency_key": "<stable-key>",
+  "correlation_id": "corr_<id>",
+  "causation_id": "msg_<parent>|run_<parent>|null",
+  "target_principal": null,
+  "provenance_refs": [],
+  "payload": {}
 }
 ```
 
-### Consumption
-Praxis checks its intake directory during `praxis.event.record` and during any heartbeat or scheduled pass. Praxis decides whether to record this as an event and extract a lesson. It is not obligated to act on every signal.
+`target_principal` is REQUIRED for any message that can result in durable memory or identity mutation.
 
----
+## Filesystem delivery
 
-## Mentor → Forge Variant Proposal
+Consumer inbox:
 
-### Purpose
-Mentor proposes skill improvements to Forge after detecting OKR regressions or patterns warranting a skill rebuild.
-
-### Path
-```
-{agent_root}/commons/data/ocas-forge/intake/{proposal_id}.json
+```text
+{agent_root}/commons/interfaces/{consumer-id}/inbox/{message_id}.json
 ```
 
-### Producer
-Mentor. Written during `mentor.heartbeat.deep` or when `mentor.proposals.create` is invoked.
+Rules:
 
-### Format
-VariantProposal schema from `spec-ocas-shared-schemas.md`.
+- producer writes a temporary file then atomically renames it;
+- published messages are immutable;
+- consumer deduplicates by `message_id` and `idempotency_key`;
+- successful consumption moves/copies the message to `processed/` according to the consumer's retention policy;
+- transient failures remain retryable with bounded attempts;
+- invalid or retry-exhausted records go to `commons/dead-letter/{consumer-id}/` with diagnosis and retry history;
+- unsupported major schema versions are rejected, not guessed;
+- consumers own acknowledgement and retry state.
 
-```json
-{
-  "proposal_id": "prop_5cfa2c1",
-  "source_skill": "ocas-mentor",
-  "timestamp": "2026-03-17T10:00:00-07:00",
-  "target_skill": "ocas-scout",
-  "base_version": "1.1.0",
-  "observed_problem": "verified_claim_ratio below 0.70 target over last 30 runs",
-  "supporting_evidence": ["eval_a7f2c1", "r_b3e8d2", "r_c91f4a"],
-  "proposed_changes": "Strengthen source corroboration requirement before marking a claim as verified",
-  "expected_improvement": "verified_claim_ratio from 0.62 to >= 0.72",
-  "evaluation_plan": "Run challenger against benchmark-scout-v1 with 20 standard research requests",
-  "minimum_runs": 20,
-  "critical_non_regression_conditions": ["entity_resolution_accuracy >= 0.90", "source_diversity >= 6"]
-}
+## Chronicle memory contract
+
+Chronicle is the only durable memory/context substrate defined by OCAS architecture. OCAS skills do not write database files or route memory through a special memory-writer skill.
+
+Every Chronicle write includes:
+
+- acting principal;
+- target/owner principal;
+- memory domain/type;
+- claim state (`user_stated`, `observed`, `inferred`, `planned`, `completed`, `disputed`, `retracted`, etc.);
+- provenance references;
+- confidence where applicable;
+- derivation/run identifier for generated claims.
+
+### User memory
+
+User facts, preferences, interests, episodes and User Dreaming derivations target the **user principal**.
+
+Agent-generated interpretation is never labeled user-stated. Re-reading the same evidence through multiple summaries does not create independent support.
+
+### Agent memory/identity
+
+Agent autobiographical observations, dreams, lessons and self-model changes target the **agent principal** and the agent identity subsystem's sanctioned stores/contracts.
+
+They do not write user facts merely because the source interaction involved the user.
+
+## User Dreaming contract
+
+Input eligibility:
+
+- user-owned Chronicle records;
+- user-authored interaction spans;
+- verified user-world events with provenance;
+- explicit corrections/retractions;
+- user-relevant journals that preserve source attribution.
+
+Output:
+
+- derived user memories;
+- temporal links;
+- contradiction records;
+- confidence updates;
+- projection candidates.
+
+All durable output targets the user principal. User Dreaming MUST NOT mutate agent identity, agent autobiographical state, or agent behavioral shifts.
+
+## Agent autobiographical growth contract
+
+The agent-growth subsystem may consume agent behavior and shared interaction evidence. Its outputs are agent-owned autobiographical/identity records. It MUST NOT mutate user-owned Chronicle claims.
+
+When one interaction feeds both User Dreaming and agent growth, each derived record has its own principal and provenance lineage.
+
+## Journal feed
+
+All skills write immutable journals under the journal root. Mentor, Lucid and other documented consumers may scan journals read-only while maintaining their own cursor state.
+
+Journals are evidence. A journal consumer that proposes durable memory must use the Chronicle contract and set `target_principal` explicitly.
+
+## Mentor -> Forge
+
+Asynchronous `VariantProposal` and `VariantDecision` messages target `ocas-forge` via its interface inbox. They use the common envelope and schemas in `spec-ocas-shared-schemas.md`.
+
+## Mentor -> Fellow
+
+`ExperimentRequest` messages target `ocas-fellow`. Fellow is reactive unless separately configured; the request does not imply autonomous permission for external side effects.
+
+## Fellow -> Mentor
+
+Every experiment emits a `CycleResult` to Mentor, including abort/no-change outcomes. Results carry environment/artifact fingerprints so promotion evidence is bound to what was actually evaluated.
+
+## Schedule/context -> Vesper
+
+Schedule and briefing producers may emit typed briefing inputs to Vesper's inbox. Structured payloads MUST be represented as JSON objects in `payload`; do not JSON-encode structured data into prose/string fields.
+
+## Vesper -> Dispatch
+
+Delivery remains a typed session/runtime handoff unless an explicitly approved durable task contract is configured. Creating a queue entry does not grant permission to send a communication.
+
+## Praxis -> Dispatch
+
+Communication actions are proposals until Dispatch/runtime approval policy authorizes the concrete send. Approval is bound to the action fingerprint (recipient/target, content or content hash, account, capability and material parameters).
+
+## Exported projections
+
+A producer may publish a documented projection under:
+
+```text
+{agent_root}/commons/exports/{producer-id}/{projection}.json
 ```
 
-### Consumption
-Forge checks its intake directory when `forge.build` is invoked or during a Forge heartbeat cycle. Forge builds the variant package and places it for challenger testing. Processed proposals move to `intake/processed/`.
+Consumers may read only projections explicitly documented in their contracts. Missing/stale exports degrade gracefully. Private data directories and private databases are not projections.
 
----
+## Cooperative runtime queries
 
-## Mentor → Forge Variant Decision
+Direct skill/runtime invocation is permitted when a typed capability exists (for example research enrichment). The caller must discover that the capability is available and degrade if optional.
 
-### Purpose
-Mentor emits a promotion decision after evaluating champion vs. challenger runs over a sufficient window.
+## Correlation and causation
 
-### Path
-```
-{agent_root}/commons/data/ocas-forge/intake/{decision_id}.json
-```
+Multi-step work preserves:
 
-### Producer
-Mentor. Written when `mentor.variants.decide` is invoked.
+- `correlation_id` across the end-to-end user/system operation;
+- `causation_id` for the immediate triggering message/run;
+- provenance references for factual lineage.
 
-### Format
-VariantDecision schema from `spec-ocas-shared-schemas.md`.
+These IDs appear in journals, intents and evidence where applicable.
 
-### Consumption
-Forge reads the decision and acts: promotes the challenger to champion if decision is `promote`, continues testing if `continue_testing`, or archives if `archive` or `reject`. Emergency rollback is handled immediately regardless of polling cycle.
+## Security boundary
 
----
+An interface contract does not itself grant capability or credentials. Privileged operations are additionally subject to runtime capability/approval/credential policy. A consumer must reject a message requesting an operation it is not authorized to perform.
 
-## Sands → Vesper Schedule Brief Intake
+## Validation
 
-### Purpose
-Sands delivers structured schedule briefs to Vesper for inclusion in morning and evening briefings.
+A valid interface must define:
 
-### Path
-```
-{agent_root}/commons/data/ocas-vesper/intake/{proposal_id}.json
-```
+- producer and consumer;
+- transport;
+- schema and major version;
+- idempotency semantics;
+- acknowledgement/retry/dead-letter behavior for queues;
+- target principal for memory/identity effects;
+- side-effect/approval policy where relevant;
+- provenance expectations for factual transformations.
 
-### Producer
-Sands. Written during `sands.brief` (both morning and evening modes).
-
-### Format
-InsightProposal schema from `spec-ocas-shared-schemas.md` with the following field values:
-- `proposal_type`: `routine_prediction`
-- `description`: `"[SANDS BRIEF: EVENING | MORNING] YYYY-MM-DD"`
-- `confidence_score`: `1.0`
-- `suggested_follow_up`: full schedule payload JSON-encoded as a string (see `references/vesper_emit_format.md` in the sands package for the payload structure)
-
-Vesper must JSON-parse `suggested_follow_up` to obtain the structured schedule data.
-
-### Consumption
-Vesper checks its intake during `vesper.briefing.morning`, `vesper.briefing.evening`, or `vesper.briefing.manual`. Processed files move to `intake/processed/`.
-
-### Notes
-Sands writes directly to Vesper intake — it does not route through Corvus. Schedule briefs are deterministic, user-invoked outputs, not pattern-detected insights.
-
----
-
-## Corvus → Vesper Opportunity Signal
-
-### Purpose
-Corvus delivers validated insight proposals to Vesper for inclusion in daily briefings.
-
-### Path
-```
-{agent_root}/commons/data/ocas-vesper/intake/{proposal_id}.json
-```
-
-### Producer
-Corvus. Written when a validated InsightProposal reaches sufficient confidence and `proposal_type` is `opportunity_discovery`, `routine_prediction`, `anomaly_alert`, or `thread_continuation`.
-
-### Format
-InsightProposal schema from `spec-ocas-shared-schemas.md`. Exclude `behavioral_signal` type (those go to Praxis).
-
-```json
-{
-  "proposal_id": "prop_b3e8d2",
-  "proposal_type": "opportunity_discovery",
-  "description": "Rally portfolio has no allocation to the energy sector despite 6 months of rising energy search activity",
-  "confidence_score": 0.78,
-  "supporting_entities": ["entity_energy_sector", "entity_nvda"],
-  "supporting_relationships": [],
-  "predicted_outcome": "Adding energy allocation may improve risk-adjusted return",
-  "suggested_follow_up": "Review Rally allocation plan for energy sector exposure",
-  "target_skill": null,
-  "created_at": "2026-03-17T10:00:00-07:00"
-}
-```
-
-### Consumption
-Vesper checks its intake during `vesper.briefing.morning`, `vesper.briefing.evening`, or `vesper.briefing.manual`. Vesper applies signal filtering rules (see `spec-ocas-signal-filtering.md` if defined, or Vesper's own `references/signal_filtering.md`). Processed files move to `intake/processed/`.
-
----
-
-## Thread → Corvus Research Signal
-
-### Purpose
-Thread delivers reconstructed research threads to Corvus for pattern analysis.
-
-### Path
-```
-{agent_root}/commons/data/ocas-corvus/intake/{thread_id}.json
-```
-
-### Producer
-Thread. Written when a research thread reaches sufficient depth to be an interest candidate.
-
-### Format
-A normalized research thread record including: `thread_id`, `topic_label`, `first_seen`, `last_seen`, `sessions`, `entities`, `concepts`, `sources`, `engagement_summary`, `thread_strength`, `novelty_score`, `interest_candidate`.
-
-### Consumption
-Corvus reads Thread's research threads during analysis cycles as additional signal context for the Interest Engine and Novelty drive.
-
----
-
-## Thread → Elephas Chronicle Candidate
-
-### Purpose
-Thread proposes stable research topics, interests, and source affinities as Chronicle candidates.
-
-### Path
-```
-{agent_root}/commons/db/ocas-elephas/intake/{candidate_id}.signal.json
-```
-
-### Producer
-Thread. Written only for high-quality candidates (interest candidates with session count ≥ 3, long_click count ≥ 3).
-
-### Format
-Candidate schema from `spec-ocas-shared-schemas.md`. Bad candidates (raw visit records, low-engagement URLs) must not be written.
-
----
-
-## Rally → Vesper Portfolio Outcome
-
-### Purpose
-Vesper reads Rally's latest daily report during briefing generation to include portfolio outcomes and allocation changes.
-
-### Path
-This is a cooperative read interface — no intake directory is used. Vesper reads directly from Rally's data directory:
-
-```
-{agent_root}/commons/data/ocas-rally/reports/{YYYY-MM-DD}-daily.json
-```
-
-Vesper reads the most recent file matching `*-daily.json` in that directory.
-
-### Format
-PortfolioOutcomeRecord schema from `spec-ocas-shared-schemas.md`. If no file exists or the most recent file is more than 48 hours old, Vesper skips Rally data for that briefing without error.
-
-### Consumption
-Vesper checks this path during `vesper.briefing.morning` and `vesper.briefing.evening`. No file is written back; Rally's data is read-only from Vesper's perspective.
-
-### Notes
-Rally writes its daily report during `rally.report.daily`. The filename format is `YYYY-MM-DD-daily.json`. Rally does not write to Vesper's intake directory — Vesper pulls when it needs the data.
-
----
-
-## Vesper → Dispatch Briefing Delivery
-
-### Purpose
-Vesper requests Dispatch to deliver a completed briefing via a user-preferred channel (e.g., iMessage, email).
-
-### Path
-None. This is a session-scoped handoff — no intake directory is used.
-
-### Producer
-Vesper. Occurs when `vesper.briefing.morning`, `vesper.briefing.evening`, or `vesper.briefing.manual` is invoked with a delivery channel configured in `config.json`.
-
-### Consumption
-Dispatch receives the briefing content directly in-session from Vesper. Dispatch drafts the delivery message and awaits explicit user confirmation before sending.
-
-### Notes
-Vesper never sends directly. Dispatch is always the sending agent. If Dispatch is not present, Vesper presents the briefing inline without delivery. This interface uses no file drop for the same reason as Praxis → Dispatch: Dispatch never operates autonomously on queued sends.
-
----
-
-## Mentor → Fellow Experiment Request
-
-### Purpose
-Mentor invokes Fellow to run a controlled benchmark experiment against a target skill, heuristic, or workflow.
-
-### Path
-```
-{agent_root}/commons/data/ocas-fellow/intake/{experiment_id}.json
-```
-
-### Producer
-Mentor. Written when `mentor.variants.decide` determines empirical evaluation is needed, or when `mentor.heartbeat.deep` detects an OKR regression requiring a benchmark experiment.
-
-### Format
-ExperimentRequest schema from `spec-ocas-shared-schemas.md`.
-
-### Consumption
-Fellow checks its intake directory when `fellow.experiment.run` is invoked. Mentor writes the ExperimentRequest file first, then invokes `fellow.experiment.run`. Fellow processes the request, runs the experiment cycle, and writes a CycleResult to Mentor's intake. Processed experiment files move to `intake/processed/`.
-
-### Notes
-Fellow is purely reactive — it has no cron or heartbeat registration. Mentor is responsible for invoking `fellow.experiment.run` after dropping the request file.
-
----
-
-## Fellow → Mentor Cycle Result
-
-### Purpose
-Fellow returns the outcome of a completed experiment cycle to Mentor for promotion decision.
-
-### Path
-```
-{agent_root}/commons/data/ocas-mentor/intake/{cycle_id}.json
-```
-
-### Producer
-Fellow. Written at the end of every `fellow.experiment.run` cycle, regardless of outcome (promote, no_change, or abort).
-
-### Format
-CycleResult schema from `spec-ocas-shared-schemas.md`.
-
-### Consumption
-Mentor reads CycleResult files from its intake directory during `mentor.heartbeat.light` and `mentor.heartbeat.deep`. On receiving a result with `decision: promote`, Mentor may emit a VariantDecision to Forge. On `abort`, Mentor logs the failure and may re-queue. Processed files move to `intake/processed/`.
-
----
-
-## Praxis → Dispatch Action Handoff
-
-### Purpose
-Praxis passes communication action decisions to Dispatch for drafting and delivery. This is a session-scoped handoff — no intake directory is used.
-
-### Path
-None. Communication is in-session: Praxis proposes a communication action and Dispatch executes within the same session context.
-
-### Producer
-Praxis. Occurs when a behavior decision or outcome requires external communication (e.g., a follow-up message, a commitment confirmation).
-
-### Consumption
-Dispatch receives the action description directly in-session from Praxis. Dispatch drafts accordingly and awaits explicit user approval before any send operation.
-
-### Notes
-This interface uses no file drop because Dispatch never operates autonomously on queued actions — all sends require user confirmation in the active session. A file-drop pattern would imply autonomous send capability that Dispatch does not have.
-
----
-
-## Cooperative Query Interfaces
-
-Cooperative query interfaces are read-only cross-skill data accesses that do not use intake directories. They are optional — the requesting skill must degrade gracefully if the cooperating skill's data is absent or unavailable.
-
-Cooperative reads are permitted for any skill to any other skill's data directory. The rules:
-- The reading skill opens data as read-only. It must not write, move, or delete files.
-- The reading skill must not block on missing data. If the target file or directory does not exist, it proceeds without that data.
-- The reading skill documents its cooperative reads in its SKILL.md `## Optional skill cooperation` section.
-
-The following cooperative reads are documented here because they are load-bearing for at least one skill's normal operation:
-
-### Sift ↔ Thread: Query Rewriting
-
-Sift may read Thread's active research context to improve query specificity. Thread's current context is available at:
-```
-{agent_root}/commons/data/ocas-thread/active_context.json
-```
-If absent, Sift proceeds with the unmodified query. Thread never reads from Sift.
-
-### Sift ↔ Weave: Entity Disambiguation
-
-Sift may query Weave's social graph database to disambiguate entity references (e.g., resolving "John" to a specific person when multiple matches exist). Weave's LadybugDB is at:
-```
-{agent_root}/commons/db/ocas-weave/
-```
-Sift opens this database as read-only. If absent, Sift proceeds with unresolved references.
-
-### Scout ↔ Weave: Identity Context
-
-Scout may read Weave's social graph to pre-populate identity context before starting a research request (known aliases, emails, relationships). Same database path as above. Scout never writes to Weave.
-
-### Taste ↔ Sift: Item Enrichment
-
-Taste may invoke Sift to enrich an extracted item (e.g., a restaurant, product, or media title) with additional structured data. This is a direct skill invocation in-session, not a file read. If Sift is absent, Taste records the item with available data only.
-
-### Voyage ↔ Sift: Venue and Route Enrichment
-
-Voyage may invoke Sift to enrich venue details, check transport options, or validate hours and pricing. Direct skill invocation in-session. If Sift is absent, Voyage proceeds with available data.
-
-### Rally ↔ Sift: News Pulse and Rumor Score
-
-As of rally v3.8.0, Rally's sentiment signal is split across two paths:
-
-**Path 1 — Direct (no Sift dependency):**
-- `social_heat` — social-media mention velocity (48h vs. 30-day baseline on Reddit/Stocktwits) is now fetched directly by Rally via a locally-hosted SearXNG instance on port 8888, through `rally_data_sources.py`. Rally caches results at `{agent_root}/commons/data/ocas-rally/sentiment_cache.jsonl`. Sift is not involved.
-- `short_interest` — direct Yahoo Finance fetch; no Sift dependency (unchanged from v3.5.4).
-
-**Path 2 — Via Sift (optional cooperation, when Sift is present):**
-Rally may invoke Sift in-session during `rally.research` for:
-- `rumor_score` — M&A / guidance / analyst-action keyword density plus SEC EDGAR insider-buy clusters
-- `news_pulse` — recent major-outlet headlines for dossier enrichment and rationale generation
-
-Sift routes these through its SearchX integration (SearXNG + x.com, Reddit, LinkedIn, news engines, SEC EDGAR). SEC EDGAR queries go through Sift's filings path.
-
-Fallback hierarchy (Path 2):
-- Sift invocation succeeds: use results directly
-- Sift present but SearchX/SearXNG unreachable: Rally uses cached values if within `max_data_age_hours` (default 72)
-- Sift absent entirely: Rally skips rumor_score and news_pulse, redistributes the 5% sentiment weight to Momentum, and logs `"sift_unavailable_sentiment_skipped"` in `decisions.jsonl`
-
-See `ocas-rally/references/research-and-scoring.md` for the full sentiment scoring procedure.
-
----
-
-## Polling and Timing
-
-Skills poll their intake directories on their own schedule. There are no push notifications or event queues.
-
-Recommended polling cadences:
-
-| Consumer | Intake | Recommended Cadence |
-|---|---|---|
-| Elephas | Signal intake (including Rally Thing + Concept/Event) | Every `elephas.ingest.journals` run (e.g., every 15 min) |
-| Mentor | Journals directory + Fellow CycleResults | Every `mentor.heartbeat.light` (e.g., every 15 min) |
-| Praxis | Behavioral signals from Corvus | Every Praxis scheduled pass or on-demand |
-| Forge | Variant proposals and decisions from Mentor | Every Forge cycle or on-demand |
-| Vesper | Opportunity signals from Corvus + Schedule briefs from Sands + Rally daily report (cooperative read) | At briefing generation time |
-| Sands | n/a — Sands writes to Vesper intake, does not poll its own intake | On `sands.brief` invocation |
-| Corvus | Research threads from Thread | During analysis cycles |
-| Fellow | ExperimentRequest from Mentor | On `fellow.experiment.run` invocation |
-
----
-
-## Error Handling
-
-If a producer cannot write to an intake directory (directory missing, permission issue):
-1. Create the directory and retry once.
-2. If still failing, log the error to the producer's own decisions.jsonl and continue.
-3. Do not halt the producing skill's normal operation.
-
-If a consumer finds a malformed file in its intake directory:
-1. Move it to `intake/errors/` with a `.error` suffix.
-2. Log the error.
-3. Continue processing remaining files.
-
----
-
-## Adding New Interfaces
-
-When a new inter-skill interface is needed:
-1. Add an entry to this spec with producer, consumer, path, format, and consumption cadence.
-2. Update the relevant skill SKILL.md files to reference this spec for the interface.
-3. Bump this spec's minor version.
-
-Do not create undocumented inter-skill interfaces.
-
+Undocumented cross-component paths are architecture violations.

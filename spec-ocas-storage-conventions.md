@@ -1,250 +1,160 @@
 # OCAS Storage Conventions
 
-Spec Version: 1.0.3
+Spec Version: 2.0.0  
 Author: Indigo Karasu
-
-Changes from 1.0: replaced workspace dot-folder convention with centralized storage under {agent_root}/commons/; defined separate roots for data, journals, and databases; added LadybugDB database convention; added intake directory convention; clarified cross-skill access rules; updated initialization and validation sections.
-
----
 
 ## Purpose
 
-This document defines the standard storage conventions for OCAS skills. All skills that persist state must follow these conventions to ensure consistency, auditability, and interoperability across the suite.
+This specification separates component-private state, immutable journals, cross-component interfaces, exported projections, and runtime-owned databases. Filesystem reachability is not an access contract.
 
----
+## Roots
 
-## Storage Roots
-
-All persistent OCAS data lives under a single central root: `{agent_root}/commons/`.
-
-Three sub-roots, one per data class:
-
-```
+```text
 {agent_root}/commons/
-  data/       — skill state, configuration, and JSONL logs
-  journals/   — journal files (telemetry, OKR evaluation)
-  db/         — LadybugDB graph databases (Elephas and Weave only)
+  data/{component-id}/       # component-private mutable/append-only state
+  journals/{component-id}/   # immutable run journals
+  interfaces/{component-id}/ # documented inbound/outbound queue surfaces
+  exports/{component-id}/    # documented read-only projections
+  dead-letter/{component-id}/# invalid/exhausted interface records
 ```
 
-No skill writes outside `{agent_root}/commons/`. No skill writes inside the skill package directory. No skill writes into another skill's data or journal directory.
+Runtime providers may maintain storage outside these roots. In particular, Chronicle storage is Chronicle-owned and MUST be accessed through Chronicle APIs/tools/contracts rather than by opening its database files.
 
----
+## Private component state
 
-## Data Directory
+`data/{component-id}/` is owned exclusively by that component.
 
-### Location
+Typical contents:
 
-```
-{agent_root}/commons/data/{skill-name}/
-```
-
-The `{skill-name}` must match the skill's hyphenated identifier exactly: `ocas-scout`, `ocas-elephas`, `ocas-weave`.
-
-### Required Structure
-
-```
-{agent_root}/commons/data/{skill-name}/
-  config.json
+```text
+config.json
+*.jsonl
+reports/
+artifacts/
+staging/
 ```
 
-### Typical Full Structure
+Other components MUST NOT read or write this directory directly. If data is intended for another component, expose it through an interface, an exported projection, or an authoritative runtime query contract.
 
-```
-{agent_root}/commons/data/{skill-name}/
-  config.json
-  {primary_log}.jsonl
-  decisions.jsonl
-  reports/
-  artifacts/
-  staging/       — temporary import/export files (for skills that bulk-process data)
+## Journals
+
+```text
+{agent_root}/commons/journals/{component-id}/YYYY-MM-DD/{run_id}.json
 ```
 
----
+Rules:
 
-## Journal Directory
+- one immutable file per completed run;
+- write atomically via temporary file then rename;
+- never edit a completed journal;
+- journals are telemetry/evidence, not automatically durable memory;
+- consumers track their own cursors/ingestion state rather than mutating producer journals.
 
-### Location
+## Interfaces
 
-```
-{agent_root}/commons/journals/{skill-name}/YYYY-MM-DD/{run_id}.json
-```
+Inbound filesystem queues live at:
 
-One file per run. Date directory created automatically. File named by `run_id`.
-
-### Structure
-
-```
-{agent_root}/commons/journals/ocas-scout/
-  2026-03-17/
-    r_a7f2c1.json
-    r_b3e8d2.json
-  2026-03-18/
-    r_c91f4a.json
+```text
+{agent_root}/commons/interfaces/{consumer-id}/inbox/
+{agent_root}/commons/interfaces/{consumer-id}/processed/
 ```
 
-Champion and challenger runs for the same comparison group live in the same date directory:
+Invalid or retry-exhausted messages move to:
 
-```
-{agent_root}/commons/journals/ocas-rally/
-  2026-03-17/
-    cg_5cfa2c1/
-      champion.json
-      challenger.json
+```text
+{agent_root}/commons/dead-letter/{consumer-id}/
 ```
 
-### Conventions
+An interface message is immutable after publication. Producers write to a temporary filename in the inbox filesystem and atomically rename to the final `{message_id}.json`.
 
-- Journal files are written atomically (write to `.tmp`, then rename).
-- Journal files are immutable after write. Never edit.
-- Runs missing journal files are invalid per `spec-ocas-journal.md`.
+Every message carries the envelope defined in `spec-ocas-interfaces.md`, including schema version, producer, idempotency key, correlation id, causation id and target principal when memory-related.
 
----
+## Exported projections
 
-## Database Directory
+A component may deliberately expose a stable read-only projection:
 
-### Location
-
-```
-{agent_root}/commons/db/{skill-name}/
+```text
+{agent_root}/commons/exports/{component-id}/{projection-name}.json
 ```
 
-Only for skills that maintain LadybugDB graph databases. Currently: `ocas-elephas` and `ocas-weave`.
+An export is not the component's private state. The producer owns its schema and refresh semantics. Consumers treat it as read-only and tolerate absence/staleness according to the documented interface.
 
-### Structure
+## Chronicle
 
-```
-{agent_root}/commons/db/ocas-elephas/
-  chronicle.lbug
-  config.json
-  staging/
-  intake/
-    {signal_id}.signal.json
-    processed/
+Chronicle is the durable memory/context provider. OCAS does not prescribe Chronicle's internal database layout.
 
-{agent_root}/commons/db/ocas-weave/
-  weave.lbug
-  config.json
-  staging/
-```
+Rules:
 
-The `.lbug` file is managed exclusively by LadybugDB. Never read or modify `.lbug`, `.wal`, `.shadow`, or `.tmp` files directly.
+- no skill opens Chronicle database files directly;
+- every durable memory operation executes as an explicit principal;
+- user and agent records remain separately owned even when they cite the same evidence;
+- provenance/event history required for retraction is canonical; rebuildable indexes/caches need not be treated as canonical backups;
+- UserContext, directive files and other injected context are projections rather than Chronicle replacements.
 
----
+## Config
 
-## Intake Directories
+Every component-local `config.json` includes at minimum:
 
-Skills that accept signals from other skills use intake directories under their data root.
+- `component_id`
+- `component_version`
+- `config_version`
+- `created_at`
+- `updated_at`
 
-```
-{agent_root}/commons/data/{skill-name}/intake/
-  {signal_id}.json      — incoming signal files
-  processed/            — moved here after consumption
-```
+Configuration is mutable state. Changes that affect external behavior should be auditable through DecisionRecord/evidence where practical.
 
-See `spec-ocas-interfaces.md` for which skills publish to which intake directories and what file formats they use.
+## JSONL logs
 
----
+Append-only JSONL records include a stable `id` and ISO-8601 timestamp. Mid-write recovery may truncate only an incomplete final line and must record that repair.
 
-## File Types and Conventions
+Common logs include:
 
-### config.json
+- `decisions.jsonl`
+- `intents.jsonl`
+- `evidence.jsonl`
+- domain-specific event logs
 
-Every skill's configuration file. Must include `ConfigBase` fields from `spec-ocas-shared-schemas.md`: `skill_id`, `skill_version`, `config_version`, `created_at`, `updated_at`.
+## Retention
 
-Config is the only mutable JSON file in the data directory. All other data files are append-only.
+Retention is explicit. Components do not silently delete canonical records. Log compaction preserves required audit/provenance semantics. Derived caches and projections may be rebuilt and have shorter retention than canonical evidence.
 
-### JSONL Files (Append-Only Logs)
+## Cross-component access
 
-Primary data storage uses JSON Lines format: one complete JSON object per line.
+Allowed:
 
-Conventions:
-- Extension: `.jsonl`
-- Append-only. Lines must not be edited or deleted after write.
-- Each record includes a unique `id` field and a `timestamp` field in ISO 8601 format.
-- Records are ordered chronologically.
+- sanctioned Chronicle contracts;
+- typed runtime/tool contracts;
+- documented filesystem interface queues;
+- documented exported projections.
 
-Common files:
-- `decisions.jsonl` — DecisionRecord entries
-- `events.jsonl` or `{domain}_events.jsonl` — log events
-- `signals.jsonl` — emitted signals
-- `candidates.jsonl` — proposed Chronicle candidates
+Forbidden:
 
-### reports/ Directory
-
-Human-readable output artifacts. Any format (Markdown, JSON, PDF). Generated artifacts, not source-of-truth data.
-
-### artifacts/ Directory (Optional)
-
-Stored evidence, drafts, or intermediate outputs supporting decision traceability.
-
-### staging/ Directory (Optional)
-
-Temporary files for bulk operations (CSV imports, export buffers). Contents are transient and may be deleted after the operation completes.
-
----
-
-## Naming Conventions
-
-Files: `snake_case`. Descriptive names indicating content: `research_events.jsonl` not `data.jsonl`.
-
-Directories: `snake_case`.
-
-Record IDs: short prefix indicating record type, underscore, unique hash or UUID. Examples: `sig_a7f2c1`, `dec_91d28e1`, `r_5cfa2c1`.
-
-Skill names: hyphenated, matching the skill's declared identifier. `ocas-scout` not `scout` or `ocas.scout`.
-
----
-
-## Retention and Cleanup
-
-Skills define retention policies in `config.json`.
-
-Standard retention fields:
-- `retention.days` — days to retain log entries (0 = indefinite)
-- `retention.max_records` — maximum records per JSONL file before rotation
-
-When a JSONL file exceeds `max_records`, rotate it:
-1. Rename current file with date suffix: `events.jsonl` → `events.2026-03-10.jsonl`
-2. Create new empty `events.jsonl` for new records
-3. Archived files remain until retention period expires
-
-Skills must not silently delete data. Expired data is removed by explicit maintenance operations only.
-
----
-
-## Cross-Skill Access
-
-Skills must not read or write another skill's data or journal directory.
-
-Cross-skill data sharing uses only:
-- Chronicle queries (via `elephas.query`)
-- Weave queries (read-only)
-- Defined intake directory drops (see `spec-ocas-interfaces.md`)
-- Journal emission and Elephas ingestion
-
----
+- opening another component's `data/` directory as an informal API;
+- opening another component's private database directly;
+- writing into another component's journal tree;
+- depending on an undocumented absolute host path.
 
 ## Initialization
 
-When a skill's data root does not exist on first run:
-1. Create `{agent_root}/commons/data/{skill-name}/`
-2. Write default `config.json` with ConfigBase fields and skill-specific defaults
-3. Create required empty JSONL files
-4. Create `{agent_root}/commons/journals/{skill-name}/` directory
-5. Create intake directories if the skill accepts signals
-6. Log initialization as a DecisionRecord
+A component creates only the roots it owns or consumes:
 
-Skills initialize automatically rather than failing on missing storage.
+1. its private `data/{component-id}/` root;
+2. its journal root;
+3. its inbound interface root if it consumes filesystem messages;
+4. its export root if it publishes projections;
+5. its dead-letter root if it consumes filesystem messages.
 
----
+Initialization is idempotent and logged.
 
 ## Validation
 
-Skills with validation scripts check:
-- Data root exists at `{agent_root}/commons/data/{skill-name}/`
-- Journal root exists at `{agent_root}/commons/journals/{skill-name}/`
-- `config.json` is valid JSON with required ConfigBase fields
-- JSONL files contain valid JSON on every line
-- No orphaned references
-- Retention policies are being respected
-- No data written outside the skill's own directories
+Validation checks:
+
+- owned roots exist when required;
+- config schema is valid;
+- JSONL parses;
+- journal writes are atomic/immutable;
+- no undocumented cross-component private-state reads exist;
+- interface messages conform to envelope/schema requirements;
+- memory operations name a target principal;
+- retention/compaction preserves required provenance.

@@ -1,0 +1,312 @@
+{
+  "schema_version": "2.0",
+  "updated": "2026-09-27",
+  "status_values": [
+    "active",
+    "transitional",
+    "planned",
+    "support"
+  ],
+  "memory_provider": "chronicle",
+  "retired_components": {
+    "ocas-elephas": {
+      "replacement": "chronicle",
+      "reason": "Memory/context provider responsibility is owned directly by Chronicle."
+    },
+    "ocas-corvus": {
+      "replacement": null,
+      "reason": "Standalone pattern-analysis hub retired; responsibilities are split among current domain/evolution owners."
+    },
+    "mempalace": {
+      "replacement": "chronicle",
+      "reason": "Legacy memory provider retired."
+    }
+  },
+  "components": [
+    {
+      "id": "chronicle",
+      "type": "runtime",
+      "layer": "memory",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/chronicle-agent-context-and-memory",
+      "responsibility": "Principal-scoped durable memory, context compaction, provenance, retrieval, correction, forgetting and ACL topology."
+    },
+    {
+      "id": "user-dreaming",
+      "type": "subsystem-contract",
+      "layer": "memory",
+      "status": "planned",
+      "visibility": "public-description",
+      "repository": null,
+      "responsibility": "Offline synthesis about the owner/user only; durable outputs belong to the user principal."
+    },
+    {
+      "id": "agent-growth",
+      "type": "subsystem",
+      "layer": "identity",
+      "status": "active",
+      "visibility": "private-implementation",
+      "repository": null,
+      "responsibility": "Agent autobiographical continuity, self-observation, dreams and identity evolution; never owns user memory."
+    },
+    {
+      "id": "ocas-usercontext",
+      "type": "skill",
+      "layer": "context",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/UserContext",
+      "responsibility": "Rebuildable current-state USER.md projection."
+    },
+    {
+      "id": "ocas-lucid",
+      "type": "skill",
+      "layer": "memory",
+      "status": "transitional",
+      "visibility": "public",
+      "repository": "indigokarasu/lucid",
+      "responsibility": "Nightly journal curation.",
+      "migration_obligation": "Remove legacy memory-provider and retired-component contracts; make durable filing principal-scoped."
+    },
+    {
+      "id": "ocas-finch",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/finch",
+      "responsibility": "Session learning and compact directive-context maintenance."
+    },
+    {
+      "id": "ocas-praxis",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/praxis",
+      "responsibility": "Bounded agent behavioral adaptation from outcomes and lessons."
+    },
+    {
+      "id": "ocas-mentor",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/mentor",
+      "responsibility": "Evaluation and improvement orchestration."
+    },
+    {
+      "id": "ocas-fellow",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/fellow",
+      "responsibility": "Controlled empirical experimentation."
+    },
+    {
+      "id": "ocas-forge",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/forge",
+      "responsibility": "Skill architecture, build, repair and validation."
+    },
+    {
+      "id": "ocas-inception",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "private",
+      "repository": null,
+      "responsibility": "Isolated environment simulation."
+    },
+    {
+      "id": "ocas-scout",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/scout"
+    },
+    {
+      "id": "ocas-sift",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/sift"
+    },
+    {
+      "id": "ocas-look",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/look"
+    },
+    {
+      "id": "ocas-reach",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/reach"
+    },
+    {
+      "id": "ocas-thread",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-weave",
+      "type": "skill",
+      "layer": "relationship",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/weave"
+    },
+    {
+      "id": "ocas-taste",
+      "type": "skill",
+      "layer": "preference",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/taste"
+    },
+    {
+      "id": "ocas-dispatch",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-voyage",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/voyage"
+    },
+    {
+      "id": "ocas-rally",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-sands",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-custodian",
+      "type": "skill",
+      "layer": "operations",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/custodian"
+    },
+    {
+      "id": "ocas-imagine",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/imagine"
+    },
+    {
+      "id": "ocas-bones",
+      "type": "skill",
+      "layer": "signal",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-spot",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/spot"
+    },
+    {
+      "id": "ocas-tasks",
+      "type": "skill",
+      "layer": "execution",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-vesper",
+      "type": "skill",
+      "layer": "interface",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/vesper"
+    },
+    {
+      "id": "ocas-haiku",
+      "type": "skill",
+      "layer": "interface",
+      "status": "active",
+      "visibility": "private",
+      "repository": null
+    },
+    {
+      "id": "ocas-bower",
+      "type": "skill",
+      "layer": "operations",
+      "status": "transitional",
+      "visibility": "public",
+      "repository": "indigokarasu/bower",
+      "migration_obligation": "Remove legacy memory-provider ingestion references."
+    },
+    {
+      "id": "ocas-skilllab",
+      "type": "skill",
+      "layer": "evolution",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/skilllab"
+    },
+    {
+      "id": "ocas-multipass",
+      "type": "skill",
+      "layer": "execution-support",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/multipass"
+    },
+    {
+      "id": "hermes-identity",
+      "type": "plugin",
+      "layer": "runtime",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/hermes-identity-plugin"
+    },
+    {
+      "id": "hermes-custodian",
+      "type": "plugin",
+      "layer": "runtime",
+      "status": "active",
+      "visibility": "public",
+      "repository": "indigokarasu/hermes-custodian-plugin"
+    }
+  ]
+}
