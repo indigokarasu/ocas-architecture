@@ -1,302 +1,225 @@
 # OCAS Architecture Overview
 
-Spec Version: 1.6.0
+Spec Version: 2.0.0  
 Author: Indigo Karasu
-
-Changes from 1.5.1: added spec-ocas-skill-improvements.md to specification index covering declarative evals (Skillgrade integration), response formats (`concise` vs `detailed`), actionable error envelopes, conditional activation, skill bundles, and staged write approval gating.
-
-Changes from 1.5.0: renamed ocas-odds to ocas-bones across all references; GitHub repo renamed indigokarasu/odds → indigokarasu/bones.
-
-Changes from 1.4.1: coherence audit 2026-05-19 discovered 2 additional active private skill repositories not previously registered; added ocas-bones (Execution Layer, formerly ocas-odds) and ocas-inception (System Evolution Layer) to the skill registry; corrected Haiku status from "no active repository" to active private repository; updated journal types table to include Bones and Inception; updated Visibility section.
-
-Changes from 1.3: coherence audit 2026-05-19 discovered 23 active OCAS skill repositories; added ocas-reach (Signal Layer), ocas-imagine (Execution Layer), ocas-google-workspace (Execution Layer), ocas-finch (System Evolution Layer), and ocas-lucid (Execution Layer) to the skill registry; re-activated 17 previously-archived skills (scout, sift, look, corvus, elephas, weave, praxis, voyage, rally, sands, custodian, taste, mentor, fellow, forge, vesper, bower, spot) whose GitHub repositories now exist; updated journal types table and cooperation flow to cover newly active skills; Relay removed from Interface Surfaces (repo still absent).
-
-Changes from 1.2: updated improvement loop to include Fellow as empirical evaluation engine between Mentor and Forge; updated Mentor description to include Workflow Plans system; updated shared schemas list to include ExperimentRequest, CycleResult, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision; updated interfaces section to reference new Mentor↔Fellow intake paths; added spec-ocas-workflow-plans.md to specification index.
-
----
 
 ## Purpose
 
-This document describes the overall architecture of the OCAS ecosystem. It defines the system layers, data flow between skills, and the role of each skill within the architecture.
+OCAS is a suite of independently useful skills and Hermes runtime components coordinated through explicit contracts. This specification defines responsibility boundaries, durable-memory ownership, system layers, and architectural invariants. `components.json` is the canonical machine-readable component registry; this document is the human-readable system model.
 
-Any skill author, coder LLM, or orchestration system should consult this document to understand where a skill fits and how it interacts with other components.
+## Core model
 
----
+OCAS separates four concerns that older revisions conflated:
 
-## System Layers
+1. **Durable memory** — Chronicle, principal-scoped and provenance-backed.
+2. **User understanding** — User Dreaming and user-context projections, owned by the user principal.
+3. **Agent identity and growth** — the agent's autobiographical system, owned by the agent principal.
+4. **Domain execution** — OCAS skills that observe, research, plan, act, evaluate, and communicate.
 
-### Signal Layer
+Chronicle is the durable memory/context substrate. It is not mediated by a special OCAS memory-writer skill. Components write or query Chronicle only through sanctioned Chronicle contracts and always as an explicit principal.
 
-Skills that observe, discover, and extract structured information from the environment.
+## Principal boundary
 
-- **Corvus** — exploratory pattern analysis across the knowledge graph and skill journals. Detects routines, threads, interests, anomalies, and opportunities. Emits InsightProposals to Vesper and behavioral signals to Praxis.
-- **Scout** — investigative OSINT research on people and organizations. Produces provenance-backed briefs.
-- **Sift** — web search, topic research, fact verification, and entity extraction. The system's general research engine.
-- **Look** — image-to-action processing. Converts user-provided images into validated, decision-ready drafts.
-- **Reach** — live world-data query engine. Normalizes queries across external data sources and returns structured results to calling skills.
-- **Thread** — personal web activity interpretation. Reconstructs browsing sessions and research threads from browser signals. Private skill.
+Every durable memory operation has an owner/principal.
 
-### Memory Layer
+- **user principal** — facts, episodes, preferences, interests, relationships, corrections, and derived understanding about the owner/user.
+- **agent principal** — the agent's own autobiographical experiences, self-model, lessons, identity development, and agent-owned operational history.
+- Additional principals may exist, but cross-principal access is explicit and ACL-governed.
 
-Skills that maintain durable structured knowledge.
+Read permission never implies write ownership. A component may use evidence visible across a permitted boundary without transferring ownership of the derived record.
 
-- **Elephas (Chronicle)** — the system's long-term knowledge graph. Ingests journals from all skills, promotes facts, resolves entity identity, and generates behavioral inferences. Only Elephas writes to Chronicle.
-- **Weave** — the social relationship graph. Maintains provenance-backed records of people, relationships, preferences, and shared experiences. Standalone LadybugDB database.
+### Shared evidence, separate derivation
 
-### Execution Layer
+A conversation may simultaneously support:
 
-Skills that plan and execute actions in the world.
+- a user-owned memory, such as a preference or correction; and
+- an agent-owned autobiographical lesson about how the interaction went.
 
-- **Praxis** — behavioral refinement loop. Captures outcomes, extracts lessons, and maintains bounded active behavior shifts. Receives behavioral signals from Corvus. Proposes skill rebuilds to Forge.
-- **Voyage** — travel planning, itinerary construction, and reservation management.
-- **Dispatch** — communications management. Inbox triage, thread tracking, draft generation, and identity-safe public communication. Private skill.
-- **Rally** — governed portfolio research, candidate scoring, allocation planning, and trade planning.
-- **Sands** — calendar management. Natural-language scheduling, conflict detection, travel time insertion via Google Places API, and schedule brief emission to Vesper.
-- **Custodian** — system health monitoring. Error diagnosis, data integrity checks, and self-healing automation.
-- **Imagine** — art-direction engine for text-to-image generation. Applies the Narrative Style Creation & Transfer methodology to produce professionally art-directed image prompts and generation workflows.
-- **Google-Workspace** — Google Workspace integration. Provides Google Drive, Docs, Sheets, Calendar, and Gmail access via Workspace MCP with a `google_api.py` script fallback.
-- **Lucid** — nightly journal curator. Batch-processes OCAS skill journals into MemPalace's verbatim store via MCP tools. Runs as a scheduled cron job at 3am, classifying each journal for filing as a MemPalace drawer entry.
-- **Bones** — prediction market intelligence layer. Aggregates market data across Polymarket, Kalshi, Predictit, and other platforms. Researches outcomes using Sift, produces calibrated probability assessments with confidence levels, and identifies edge where assessment diverges from market pricing. Tracks accuracy over time. Emits Event signals to Elephas. Private skill.
+Those are two records with separate principals, provenance, confidence, lifecycle, and retraction behavior. Evidence may be shared; derived identity may not be conflated.
 
-### Preference Layer
+## User Dreaming
 
-Skills that maintain user preference models.
+**User Dreaming** is offline consolidation about the user only. It may connect temporally separated user evidence, resolve contradictions, identify repeated preferences/interests, and create derived user-memory candidates.
 
-- **Taste** — behavior-driven taste model. Builds recommendations from consumption signals with evidence-backed explanations.
+User Dreaming:
 
-### System Evolution Layer
+- reads user-owned Chronicle memory and eligible user-grounded evidence;
+- distinguishes user-stated facts, observations, inference, prediction, and uncertainty;
+- rejects circular reinforcement from its own previous summaries;
+- records provenance for every accepted derivation;
+- writes durable outputs only to the user principal;
+- may feed rebuildable user-context projections;
+- never changes the agent's identity/persona or activates agent behavioral shifts.
 
-Skills that improve the system itself.
+## Agent autobiographical growth
 
-- **Mentor** — orchestration and evaluation engine. Manages long-running workflows (including named Workflow Plans), analyzes journals from all skills, evaluates champion vs. challenger variants, and proposes skill improvements to Forge. Routes experiments to Fellow for empirical evaluation. Reads journals directly for evaluation (parallel to Elephas ingestion).
-- **Fellow** — empirical experimentation engine. Invoked exclusively by Mentor via intake file drop. Establishes a fresh baseline, generates and tests controlled variants within a constrained mutation surface, and returns the winning result with full lineage via CycleResult to Mentor's intake. Stores experiment lineage through Elephas.
-- **Forge** — skill architect and builder. Designs, builds, and validates Agent Skill packages. Consumes variant proposals from Mentor. Emits complete installable packages.
-- **Finch** — session self-improvement orchestrator. Mines agent session JSONL files to detect corrections, breakthroughs, methodologies, and behavioral directives. Routes findings to MEMORY.md and skill patches. Named for Darwin's finch; adaptive evolution of the system.
-- **Inception** — full environment simulation engine. Spins up a complete isolated copy of the indigo environment inside a Docker container, runs integration tests (credentials, bootstrap, services), reports results, and destroys the container. Used by Forge and the operator for safe destructive testing. Private skill.
+**Agent autobiographical growth** is a separate subsystem. It owns the agent's continuity, self-observation, dreams, mistakes, lessons, aesthetics, relationships, and evolving self-model.
 
-### Interface Surfaces
+It:
 
-- **Vesper** — daily briefing generator. Aggregates signals from Corvus, Dispatch, Rally, Sands, and other skills into morning and evening briefings. Presents outcomes without exposing internal processes.
-- **Haiku** — social media presence management for Bluesky. Content strategy, post generation with human-writing quality gate, follow maintenance, and haiku practice. Active private repository.
+- writes only agent-owned autobiographical/identity state;
+- may cite shared interaction evidence;
+- does not manufacture user facts from agent reflection;
+- does not rewrite user-owned Chronicle memories;
+- remains authoritative for agent identity evolution.
 
----
+User Dreaming and agent autobiographical growth may process the same source interaction independently. Neither is a stage of the other.
 
-## Data Flow
+## Context and behavior projections
 
-### Journal Flow
+Durable memory is not the same as injected context or behavior.
 
-Every skill run writes a journal. Elephas and Mentor are parallel consumers with different purposes.
+- **Chronicle durable memory** — canonical principal-scoped memory/beliefs.
+- **Agent autobiographical identity** — canonical agent self-history and self-model.
+- **Behavioral shifts** — bounded agent behavior adjustments; owned by the agent side of the system.
+- **Directive context** — compact always/never operational instructions injected into sessions; rebuildable and not a substitute for Chronicle.
+- **User context projection** — compact current-state USER.md/Daily Context material; rebuildable from user signals/memory and not canonical durable memory.
 
-```
-All Skills → journals/
-             ├── Elephas (ingestion → Chronicle facts)
-             └── Mentor (evaluation → OKR scoring, variant proposals → Forge)
-```
+## System layers
 
-Elephas ingests journal entity signals into Chronicle (knowledge graph).
-Mentor reads journals for performance evaluation and skill improvement.
-These are independent reads. Neither blocks the other.
+### Signal and research
 
-### Improvement Loop
+Scout, Sift, Look, Reach, Thread, Bones and other domain observers collect or derive evidence. They retain domain-specific raw state locally and may propose durable memories through Chronicle contracts when evidence is worth preserving.
 
-```
-Mentor (detects OKR regression or pattern)
-  → VariantProposal → Forge (builds variant skill package)
-  → ExperimentRequest → Fellow (empirical benchmark evaluation)
-  → CycleResult → Mentor (promote | no_change | abort decision)
-  → VariantDecision → Forge (applies promotion if approved)
-```
+### Memory and relationship
 
-Mentor writes ExperimentRequest files to Fellow's intake. Fellow runs controlled experiments and writes CycleResult to Mentor's intake. Mentor then emits a VariantDecision to Forge. All handoffs are filesystem drops to intake directories.
+- **Chronicle** — principal-scoped durable memory, beliefs, provenance, temporal context, retrieval and ACLs.
+- **User Dreaming** — user-only offline synthesis and consolidation.
+- **Lucid** — nightly journal curation for configured memory ingestion. Lucid is not the agent's autobiographical dream system and must not write unscoped/global memory.
+- **Weave** — relationship/social-graph domain capability where deployed. Its private implementation state is not a general cross-skill datastore.
+- **UserContext** — rebuildable current-state user projection.
 
-Corvus contributes to the improvement loop by detecting behavioral anomalies in skill output patterns and emitting signals that Praxis records as events:
+### Execution
 
-```
-Corvus (detects behavioral anomaly in journals)
-  → Signal → Praxis intake
-  → Praxis (records event, may extract lesson, propose behavior shift)
-```
+Praxis, Voyage, Dispatch, Rally, Sands, Custodian, Imagine and other domain skills plan or perform actions. External side effects follow recovery, approval and evidence contracts.
 
-### Query Flow
+Praxis owns bounded agent behavioral adaptation. It does not own broad user autobiography or user durable memory.
 
-```
-Any Skill → Elephas.query (world knowledge from Chronicle)
-Any Skill → Weave.query (social graph, read-only)
-```
+### Preference
 
-Chronicle is read-only for all skills except Elephas. Weave is read-only for all skills except Weave itself.
+Taste owns domain preference modeling. Durable user preference claims promoted beyond Taste's local model are user-principal Chronicle records with provenance.
 
-### Cooperation Flow
+### System evolution
 
-Skills may cooperate when present but must never depend on each other.
+- **Mentor** — evaluation and improvement orchestration.
+- **Fellow** — empirical experimentation.
+- **Forge** — skill architecture, build and validation.
+- **Finch** — session learning and compact directive-context maintenance.
+- **Inception** — isolated environment simulation where deployed.
+- **Agent autobiographical growth** — identity/self-development, separate from user memory and skill optimization.
 
-```
-Sift → Weave (entity disambiguation)
-Sift → Thread (recent browsing context for query rewriting)
-Scout → Weave (identity context)
-Taste → Sift (item enrichment)
-Corvus → Elephas (graph context for pattern analysis)
-Look → Sift (web research for validation)
-Vesper → Corvus (receives opportunity signals)
-Dispatch → Praxis (receives action decisions)
-Rally → Vesper (portfolio outcome signals)
-Thread → Corvus (research thread signals)
-Thread → Elephas (Chronicle candidates)
+### Interface surfaces
+
+Vesper, Haiku and other presentation/delivery surfaces consume typed outputs without becoming owners of upstream durable state.
+
+## Data flow
+
+### Journals
+
+Every skill run writes an immutable journal. Journals are telemetry/evidence, not automatically durable personal memory.
+
+```text
+All Skills -> journals/
+              |-> Mentor/Fellow evaluation
+              |-> Lucid curation
+              `-> other explicitly documented consumers
 ```
 
-### Briefing Flow
+A consumer may propose Chronicle records from a journal, but Chronicle promotion requires an explicit target principal, provenance and sanctioned write contract.
 
-```
-Corvus → opportunity signals
-Dispatch → communication summaries    ┐
-Rally → portfolio outcomes            ├→ Vesper → briefing → Dispatch (delivery)
-Calendar / Weather / Context          ┘
-```
+### User-memory consolidation
 
----
-
-## Naming Convention
-
-All skills use hyphenated identifiers: `ocas-scout`, `ocas-rally`, `ocas-taste`.
-
-Dots must not be used because some runtimes interpret them as hierarchy separators.
-
----
-
-## Storage Convention
-
-All persistent data is stored centrally under `{agent_root}/commons/`, not inside skill packages or workspace dot-folders.
-
-See `spec-ocas-storage-conventions.md` for the full standard.
-
-```
-{agent_root}/commons/
-  data/{skill-name}/     — skill state, config, JSONL logs
-  journals/{skill-name}/ — journal files
-  db/{skill-name}/       — LadybugDB databases (Elephas, Weave only)
+```text
+user-grounded evidence
+  -> Chronicle user principal
+  -> User Dreaming
+  -> verified derived user memories / temporal links / contradictions
+  -> user-context projections as needed
 ```
 
----
+Prior dream output is not independent evidence for itself.
 
-## Inter-Skill Communication
+### Agent growth
 
-Skills communicate through shared filesystem paths, not direct calls.
+```text
+agent behavior + interaction evidence
+  -> agent autobiographical observations
+  -> agent dream/reflection/growth pipeline
+  -> canonical agent self-model
+  -> bounded injected identity projection
+```
 
-See `spec-ocas-interfaces.md` for all intake directories, signal formats, and handoff contracts.
+This flow does not write user memory.
 
----
+### Improvement loop
 
-## Journal Types
+```text
+Mentor -> VariantProposal -> Forge
+Mentor -> ExperimentRequest -> Fellow
+Fellow -> CycleResult -> Mentor
+Mentor -> VariantDecision -> Forge
+```
 
-See `spec-ocas-journal.md` for the full journal specification.
+System improvement evidence may be stored as operational records but must not be confused with user or agent autobiographical memory.
 
-Three formal types:
+## Inter-component communication
 
-- **Observation Journal** — signals discovered by the system
-- **Action Journal** — actions executed by the system
-- **Research Journal** — research sessions and sources
+Use, in order of preference:
 
-Journal type by skill:
+1. typed runtime/tool contract;
+2. Chronicle query/write contract for durable memory;
+3. documented intake queue under the consumer's interface path;
+4. exported read-only projection explicitly documented for cooperative reads.
 
-| Skill | Journal Type |
-|---|---|
-| Corvus | Observation |
-| Scout | Observation, Research |
-| Sift | Observation, Research |
-| Look | Observation |
-| Reach | Observation, Research |
-| Taste | Observation |
-| Rally | Observation, Action |
-| Thread | Observation |
-| Weave | Observation, Action (sync/writeback) |
-| Bower | Observation, Action |
-| Elephas | Action |
-| Praxis | Action |
-| Dispatch | Action |
-| Voyage | Action |
-| Sands | Action |
-| Custodian | Action |
-| Imagine | Action |
-| Google-Workspace | Action |
-| Lucid | Action |
-| Vesper | Action |
-| Forge | Action |
-| Mentor | Action |
-| Fellow | Action |
-| Finch | Action |
-| Spot | Action |
-| Bones | Observation, Research |
-| Inception | Action |
+A component MUST NOT open another component's private data directory or database merely because the filesystem is reachable.
 
----
+Filesystem intake delivery uses atomic write-then-rename, immutable messages, idempotency keys, schema versions, correlation/causation IDs, processed acknowledgement, retry policy and dead-letter handling. See `spec-ocas-interfaces.md`.
 
-## Ontology
+## Storage
 
-See `spec-ocas-ontology.md` for the shared entity type hierarchy and identity model.
+Persistent OCAS state lives under `{agent_root}/commons/` according to `spec-ocas-storage-conventions.md`. Chronicle's own runtime storage is Chronicle-owned and is accessed through Chronicle contracts, not by opening database files from skills.
 
-Chronicle (Elephas) is the authoritative store. All skills that extract or reference entities use the shared ontology.
+## Recovery
 
----
+Scheduled and side-effecting components follow `spec-ocas-recovery.md`: durable intent before action, execution evidence on every run, idempotent retry, lease/reclaim semantics where concurrency exists, expected-outcome verification, degradation handling and repair re-validation.
 
-## Shared Schemas
+## Registry and drift validation
 
-See `spec-ocas-shared-schemas.md` for canonical cross-cutting data objects: DecisionRecord, Signal, Candidate, JournalEntry, ConfigBase, LogEvent, SkillStatus, InsightProposal, BehavioralSignal, VariantProposal, VariantDecision, ExperimentRequest, CycleResult.
+`components.json` is the canonical component/status registry. Retired components are retained there only as migration/history metadata and MUST NOT reappear as active dependencies.
 
----
-
-## Interfaces
-
-See `spec-ocas-interfaces.md` for:
-- all inter-skill intake directory contracts
-- signal delivery formats
-- the Corvus→Praxis behavioral signal path
-- the Mentor→Forge variant proposal and decision paths
-- the Mentor→Fellow ExperimentRequest path
-- the Fellow→Mentor CycleResult path
-- the Elephas signal intake path
-- the Thread→Corvus and Thread→Elephas paths
-
-See `spec-ocas-workflow-plans.md` for:
-- the Workflow Plans format and parameter system
-- plan run tracking and state schema
-- invocation patterns (manual, cron, heartbeat)
-
-See `spec-ocas-skill-improvements.md` for:
-- declarative evaluation suite schemas (`eval.yaml`) and pass-rate thresholds for Fellow/Mentor evaluation
-- response format standards (`concise` vs `detailed`) and actionable error envelopes
-- conditional activation metadata (`requires_tools`, `fallback_for_tools`)
-- skill bundles (`references/bundles/`) for multi-skill workflow aliases
-- progressive disclosure knowledge-base skill authoring standards
-- quality linters and staged write approval gates for agent-created skill patches
-
----
-
-## Recovery (cross-cutting)
-
-All scheduled skills implement self-recovery via the Durable Intent Queue and Execution Evidence Log patterns. See `spec-ocas-recovery.md` for the standard contract. Every skill that runs on a schedule, produces side effects, or maintains durable state implements: schedule gap detection, dependency degradation with fallback cascades, data integrity validation, idempotent self-repair with re-validation, and log compaction.
-
-## Visibility
-
-- **Private skills** (must not be published or distributed): Dispatch, Thread, Bones, Inception, Haiku
-- **All others**: public
-- **No active repository**: Relay
-
----
+`python scripts/validate_architecture.py` validates core contracts. CI runs it on pushes and pull requests.
 
 ## Invariants
 
-- Only Elephas writes to Chronicle.
-- Only Weave writes to `{agent_root}/commons/db/ocas-weave/`.
-- Only Elephas writes to `{agent_root}/commons/db/ocas-elephas/`.
-- No skill reads or writes another skill's data directory.
-- Challenger variants never execute side effects.
+- Every durable memory write names an explicit target principal.
+- User Dreaming writes only user-owned durable memory.
+- Agent autobiographical growth writes only agent-owned identity/autobiographical state.
+- Cross-principal reads require explicit authorization; read permission never grants write ownership.
+- Agent-generated interpretations are not silently upgraded to user-authored evidence.
+- Reprocessing the same evidence does not increase confidence merely through repetition.
+- UserContext and directive files are projections, not canonical durable memory stores.
+- No skill reads or writes another component's private data directory or private database.
 - Journals are append-only and immutable after write.
-- Skills must function independently even when cooperating skills are absent.
-- Private skills must never be published or distributed.
-- All inter-skill data sharing uses defined intake paths or Chronicle/Weave queries.
-- Every scheduled run writes an evidence record, including when no side effects occur.
-- Skills never silently skip intended work; a no-op is always accompanied by a reason.
-- Self-repair attempts are logged as decision entries before execution.
-- After self-repair, re-validation confirms the fix before the repair is logged as successful.
-- Skills detect and recover from stale file locks on embedded databases.
-- Recovery logs are compacted (not blind-deleted) per `spec-ocas-recovery.md` thresholds.
+- Challenger variants never execute external side effects.
+- Skills degrade honestly when optional cooperating components are absent.
+- Every scheduled run writes execution evidence, including deliberate no-ops.
+- Self-repair is not successful until re-validation passes.
+- Retired components cannot appear in active architecture contracts.
+
+## Specification index
+
+- components.json — canonical component registry and lifecycle state
+- spec-ocas-component-registry.md — registry semantics and drift rules
+- spec-ocas-principals-and-memory-boundaries.md — user/agent ownership, correction and erasure
+- spec-ocas-user-dreaming.md — user-only offline consolidation
+- spec-ocas-runtime-contracts.md — capabilities, credentials, task/provenance/artifact/introspection contracts
+- spec-ocas-interfaces.md — cross-component communication
+- spec-ocas-storage-conventions.md — private state, journals, queues, exports and runtime storage
+- spec-ocas-shared-schemas.md — canonical cross-component objects
+- spec-ocas-journal.md — immutable run/evaluation evidence
+- spec-ocas-recovery.md — durable intent, leases, evidence and verified repair
+- spec-ocas-workflow-plans.md — durable workflow plans
+- spec-ocas-ontology.md — entity/relationship semantics
+- spec-ocas-skill-improvements.md — evaluation and evolution
+- ocas-skill-authoring-rules.md — authoring rules
+- ocas-build-template.md — implementation template
