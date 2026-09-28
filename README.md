@@ -45,11 +45,27 @@ The canonical component lifecycle registry is components.json.
 
 ## Validation
 
+Validate this architecture repository:
+
 ~~~bash
 python3 scripts/validate_architecture.py
 ~~~
 
-CI runs the same validator on pushes and pull requests.
+Audit checked-out Indigo repositories for active references to retired systems:
+
+~~~bash
+python3 scripts/audit_legacy_references.py --workspace ~/src
+~~~
+
+Or audit every repository visible to an authenticated GitHub CLI session:
+
+~~~bash
+python3 scripts/audit_legacy_references.py --owner indigokarasu
+~~~
+
+The cross-repo audit deliberately excludes preserved historical journals and quarantined retired-component state. Those remain evidence; active code, config, cron, interfaces, and operational documentation may not depend on retired systems.
+
+CI runs the architecture-local validator on pushes and pull requests. The organization-wide audit requires credentials that can read private repositories, so it is run from an authenticated operator/maintenance environment rather than relying on a public-repository Actions token.
 
 ## Migration state
 
